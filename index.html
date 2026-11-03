@@ -1,0 +1,1612 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#F5F4F0">
+<meta name="color-scheme" content="light">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Palestra">
+<title>Palestra</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23B93D0B'/%3E%3Cpath d='M14 32h36M20 22v20M44 22v20M14 26v12M50 26v12' stroke='%23fff' stroke-width='5' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Barlow+Condensed:wght@600;700&display=swap">
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{
+  --bg:#F5F4F0;--card:#FFFFFF;--line:#E4E2DC;--ink:#17191E;--mut:#5A5F69;--mut2:#3F444D;
+  --acc:#B93D0B;--acc-h:#8F2E07;--acc-soft:#FBEBE2;--ok:#2E7D4F;--ok-ink:#1F6B40;--ok-soft:#E5F2EA;
+  --t-acc:#F08A5D;--in:#C9C6BE;--chip:#EEEDE8;--seg:#E9E7E1;--thumb:#2A2D34;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'Manrope',system-ui,-apple-system,sans-serif;font-size:15px;line-height:1.35;-webkit-tap-highlight-color:transparent}
+a{color:var(--acc)} a:hover{color:var(--acc-h)}
+button{appearance:none;-webkit-appearance:none;background:none;border:0;margin:0;padding:0;font:inherit;color:inherit;cursor:pointer;text-align:inherit}
+button:disabled{cursor:default;opacity:.4}
+input,select,textarea{font:inherit;color:var(--ink)}
+:focus-visible{outline:3px solid rgba(185,61,11,.45);outline-offset:2px}
+[hidden]{display:none!important}
+.num{font-family:'Barlow Condensed',sans-serif;font-weight:700}
+#app{max-width:480px;margin:0 auto;min-height:100vh;min-height:100dvh}
+
+.scr{padding:28px 20px calc(104px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:18px}
+.scr.sub{padding:20px 20px calc(32px + env(safe-area-inset-bottom));gap:14px}
+.scr.sub.nav{padding-bottom:calc(104px + env(safe-area-inset-bottom))}
+.scr.center{min-height:100vh;min-height:100dvh;justify-content:center;padding-bottom:28px}
+.head{display:flex;flex-direction:column;gap:2px}
+.date{font-size:13px;color:var(--mut);font-weight:600}
+h1.big{margin:0;font-size:30px;font-weight:800;letter-spacing:-.5px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:14px}
+.card.sm{border-radius:14px;padding:12px 14px;gap:4px}
+.eyebrow{font-size:12px;color:var(--mut);font-weight:800;text-transform:uppercase;letter-spacing:.6px}
+.grp{margin:6px 0 0;font-size:12px;font-weight:800;color:var(--mut);text-transform:uppercase;letter-spacing:.8px}
+.muted{color:var(--mut)}
+.txt{margin:0;font-size:15px;line-height:1.45;color:var(--mut2)}
+.hint{margin:0;font-size:13px;color:var(--mut);font-weight:600}
+.between{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.banner{background:var(--chip);color:var(--mut2);border-radius:14px;padding:10px 14px;font-size:13px;font-weight:600;line-height:1.4}
+
+/* settimana e giorni */
+.weekbar{display:grid;gap:6px}
+.weekbar span{height:6px;border-radius:3px;background:var(--line)}
+.weekbar .past{background:var(--ink)} .weekbar .cur{background:var(--acc)}
+.days{display:grid;gap:10px}
+.day{background:var(--bg);border:2px solid transparent;border-radius:14px;padding:10px 8px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-height:76px}
+.day .l{font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:700;color:var(--mut);line-height:1.1}
+.day .s{font-size:12px;font-weight:600;color:var(--mut);display:flex;align-items:center;gap:4px}
+.day.done{background:var(--ok-soft)} .day.done .l,.day.done .s{color:var(--ok-ink);font-weight:700}
+.day.sel{background:#fff;border-color:var(--acc)} .day.sel .l,.day.sel .s{color:var(--acc);font-weight:700}
+.day.done.sel{background:var(--ok-soft)} .day.done.sel .l,.day.done.sel .s{color:var(--ok-ink)}
+.tag-scarico{align-self:flex-start;background:var(--acc-soft);color:var(--acc);font-size:12px;font-weight:800;padding:3px 8px;border-radius:8px}
+
+/* pulsanti */
+.cta{background:var(--acc);color:#fff;border-radius:18px;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;text-align:left;min-height:64px}
+.cta .t{display:block;font-size:19px;font-weight:800}
+.cta .st{display:block;font-size:13px;font-weight:500;color:#FBE3D6;margin-top:2px}
+.link-row{text-decoration:none;color:var(--ink);background:#fff;border:1px solid var(--line);border-radius:18px;padding:14px 16px;display:flex;align-items:center;gap:14px;width:100%;text-align:left;cursor:pointer}
+.link-row:hover{color:var(--ink)}
+.link-row .tx{display:flex;flex-direction:column;gap:2px;flex-grow:1;min-width:0}
+.link-row .t{font-size:16px;font-weight:700}
+.link-row .st{font-size:13px;color:var(--mut)}
+.ic{width:44px;height:44px;border-radius:12px;background:var(--acc-soft);color:var(--acc);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ic.neutral{background:var(--chip);color:var(--mut2)}
+.btn-out{border:2px solid var(--ink);border-radius:14px;padding:12px;text-align:center;font-size:15px;font-weight:700;width:100%;min-height:48px}
+.btn-txt{display:block;text-align:center;font-size:13px;font-weight:600;color:var(--mut);text-decoration:underline;padding:8px;min-height:40px;width:100%}
+.btn-pri{display:flex;align-items:center;justify-content:center;gap:8px;background:var(--acc);color:#fff;border-radius:16px;padding:15px;text-align:center;font-size:16px;font-weight:800;width:100%;min-height:52px}
+.btn-dark{background:var(--ink);color:#fff;border-radius:18px;padding:18px;text-align:center;font-size:17px;font-weight:800;width:100%;min-height:56px}
+.btn-sec{display:flex;align-items:center;justify-content:center;gap:8px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px;text-align:center;font-size:15px;font-weight:700;width:100%;min-height:48px;cursor:pointer}
+.btn-danger{display:flex;align-items:center;justify-content:center;gap:8px;background:#fff;border:1px solid #E7C2B1;color:#A3320A;border-radius:14px;padding:12px;font-size:15px;font-weight:700;width:100%;min-height:48px}
+.btn-danger.full{background:#A3320A;color:#fff;border-color:#A3320A;border-radius:16px;min-height:52px;font-weight:800}
+.btn-dash{border:2px dashed var(--in);border-radius:16px;padding:14px;display:flex;align-items:center;justify-content:center;gap:8px;font-size:14px;font-weight:700;color:var(--mut2);width:100%;min-height:52px}
+.iconbtn{width:44px;height:44px;border-radius:12px;background:#fff;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--ink);text-decoration:none}
+.iconbtn.plain{background:none;border:0;color:var(--mut)}
+.pill-btn{display:flex;align-items:center;gap:6px;height:44px;padding:0 12px;border-radius:12px;border:1px solid var(--line);background:#fff;font-size:13px;font-weight:700;flex-shrink:0}
+
+/* barra in alto delle schermate interne */
+.topbar{display:flex;align-items:center;gap:8px}
+.topbar .tt{display:flex;flex-direction:column;flex-grow:1;min-width:0}
+.topbar h1{margin:0;font-size:24px;font-weight:800;line-height:1.2}
+.topbar .sub{font-size:13px;color:var(--mut);font-weight:600}
+.topbar .lbl-top{font-size:13px;color:var(--mut);font-weight:700;flex-grow:1;min-width:0}
+.progress{height:6px;border-radius:3px;background:var(--line);overflow:hidden}
+.progress div{height:6px;background:var(--ok)}
+
+/* card esercizio */
+.ex{background:#fff;border:1px solid var(--line);border-radius:16px;padding:12px;display:flex;gap:12px;align-items:center}
+.ex.cur{border:2px solid var(--acc);padding:11px}
+.ex.done{opacity:.85}
+.ex.skip{opacity:.6}
+.ex .body{display:flex;flex-direction:column;gap:4px;flex-grow:1;min-width:0;text-align:left;align-self:stretch;justify-content:center}
+.ex .n{font-size:15px;font-weight:700}
+.ex .m{font-size:13px;color:var(--mut);font-weight:600}
+.ex .tn{font-size:12.5px;color:var(--mut);line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.ex .tn b{color:var(--mut2)}
+.ex .vlink{display:inline-flex;align-items:center;gap:4px;font-size:13px;font-weight:700;text-decoration:none;align-self:flex-start;padding:4px 0}
+.ord{display:flex;flex-direction:column;gap:2px;flex-shrink:0}
+.ord button{width:36px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--mut)}
+.thumb{width:84px;height:64px;border-radius:10px;background:var(--thumb);flex-shrink:0;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center}
+.thumb img,.video img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.thumb .pl{position:relative;width:30px;height:30px;border-radius:15px;background:rgba(23,25,30,.55);display:flex;align-items:center;justify-content:center}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:700;padding:3px 8px;border-radius:8px;background:var(--chip);color:var(--mut2)}
+.chip.ok{background:var(--ok-soft);color:var(--ok-ink)} .chip.acc{background:var(--acc-soft);color:var(--acc)}
+
+/* esercizio in corso */
+.video{border-radius:16px;background:var(--thumb);height:190px;position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:#D6D8DD;text-decoration:none}
+.video .pl{position:relative;width:60px;height:60px;border-radius:30px;background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 10px rgba(0,0,0,.25)}
+.vlink-big{display:flex;align-items:center;gap:6px;font-size:14px;font-weight:700;text-decoration:none;margin-top:-4px;min-height:32px}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.stat{background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.stat .k{font-size:11px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.5px}
+.stat .v{font-family:'Barlow Condensed',sans-serif;font-size:24px;font-weight:700;line-height:1.15;overflow-wrap:anywhere}
+.stat .x{font-size:11px;color:var(--mut);font-weight:600}
+.k-up{font-size:11px;font-weight:800;color:var(--mut);text-transform:uppercase;letter-spacing:.5px}
+
+.timer{background:var(--ink);color:#fff;border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:12px;transition:background-color .3s}
+.timer .dots{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.timer .dots i{width:10px;height:10px;border-radius:5px;background:#4A4E57}
+.timer .dots i.f{background:#fff} .timer .dots i.c{background:var(--t-acc)}
+.timer .undo{font-size:12px;font-weight:700;color:#B5B8BF;text-decoration:underline;padding:6px 4px}
+.tbtn{width:48px;height:48px;border-radius:24px;border:1px solid #4A4E57;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#D6D8DD;flex-shrink:0}
+.tmid{display:flex;flex-direction:column;align-items:center;text-align:center}
+.tnum{font-family:'Barlow Condensed',sans-serif;font-size:84px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums}
+.tsub{font-size:12px;color:#B5B8BF;font-weight:600}
+.tbar{height:6px;border-radius:3px;background:#33363E;overflow:hidden}
+.tbar div{height:6px;background:var(--t-acc)}
+.tg1{border:1px solid #4A4E57;border-radius:14px;padding:13px;text-align:center;font-size:14px;font-weight:700;min-height:48px}
+.tg2{background:#fff;color:var(--ink);border-radius:14px;padding:13px;text-align:center;font-size:14px;font-weight:800;min-height:48px}
+.timer.end{background:var(--ok);animation:fine 1.1s ease-out 3}
+.timer.end .tsub{color:#fff;font-size:15px;font-weight:800}
+.timer.end .tbtn,.timer.end .tg1{border-color:rgba(255,255,255,.5);color:#fff}
+.timer.end .tbar{background:rgba(255,255,255,.3)} .timer.end .tbar div{background:#fff}
+.timer.end .dots i{background:rgba(255,255,255,.35)} .timer.end .dots i.f{background:#fff} .timer.end .dots i.c{background:#BFE3CC}
+.timer.end .undo{color:#E5F2EA}
+@keyframes fine{0%{box-shadow:0 0 0 0 rgba(46,125,79,.75)}100%{box-shadow:0 0 0 20px rgba(46,125,79,0)}}
+@media (prefers-reduced-motion:reduce){.timer.end{animation:none}}
+
+/* form */
+.fld{display:flex;flex-direction:column;gap:4px;min-width:0}
+.fld>label,.lbl{font-size:12px;font-weight:700;color:var(--mut)}
+.inp{width:100%;height:48px;border:1px solid var(--in);border-radius:12px;padding:0 12px;font-size:16px;background:#fff}
+.inp.big{height:52px;text-align:center;font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:700;padding:0 6px}
+textarea.inp{height:auto;padding:12px;resize:vertical;line-height:1.4;min-height:72px}
+textarea.code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;min-height:160px}
+select.inp{font-weight:700;font-size:15px;padding-right:8px}
+.static{height:52px;border-radius:12px;background:var(--chip);color:var(--mut2);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;text-align:center;padding:0 6px}
+.rir{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
+.rir button{height:44px;border-radius:12px;border:1px solid var(--in);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700}
+.rir button[aria-pressed="true"]{background:var(--acc);border-color:var(--acc);color:#fff;font-weight:800}
+.check{display:flex;align-items:center;gap:10px;min-height:44px;font-size:15px;font-weight:600;cursor:pointer}
+.check input{width:22px;height:22px;accent-color:var(--acc)}
+.err{background:var(--acc-soft);color:var(--acc-h);border-radius:14px;padding:12px 14px;font-size:14px;font-weight:600;line-height:1.45}
+.err ul{margin:6px 0 0;padding-left:18px}
+.ok-box{background:var(--ok-soft);color:var(--ok-ink);border-radius:14px;padding:12px 14px;font-size:14px;font-weight:600;line-height:1.45}
+.wrow{display:grid;grid-template-columns:52px 1fr 14px 1fr 1.3fr;gap:6px;align-items:center}
+.wrow .inp{height:44px;padding:0 8px;text-align:center}
+.wrow .inp.nota{text-align:left;font-size:14px}
+.wrow span{font-size:13px;font-weight:700;color:var(--mut);text-align:center}
+.saved{font-size:12px;color:var(--mut);font-weight:600;min-height:16px}
+
+/* segmented */
+.seg{background:var(--seg);border-radius:14px;padding:4px;display:grid;gap:4px}
+.seg button{height:40px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:var(--mut2);min-width:0;padding:0 4px}
+.seg button[aria-pressed="true"]{background:#fff;color:var(--ink);font-weight:800}
+.seg.small button{height:34px;font-size:13px}
+.pnav{display:flex;align-items:center;gap:8px}
+.pnav .lab{flex-grow:1;text-align:center;font-size:15px;font-weight:800}
+.chartbox{position:relative;height:190px}
+.empty{font-size:14px;color:var(--mut);font-weight:600;text-align:center;padding:28px 8px;background:var(--bg);border-radius:14px}
+.legend{display:flex;gap:16px;font-size:12px;font-weight:600;color:var(--mut2);flex-wrap:wrap}
+.legend span{display:flex;align-items:center;gap:6px}
+
+/* nav */
+#nav{position:fixed;left:0;right:0;bottom:0;z-index:20;background:#fff;border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}
+#nav .in{max-width:480px;margin:0 auto;height:76px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr))}
+#nav a{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:var(--mut);font-size:11px;font-weight:600;text-decoration:none}
+#nav a[aria-current="page"]{color:var(--acc);font-weight:700}
+
+/* fogli e messaggi */
+.ov{position:fixed;inset:0;background:rgba(23,25,30,.45);z-index:50;display:flex;align-items:flex-end;justify-content:center}
+.sh{background:var(--bg);width:100%;max-width:480px;max-height:92vh;max-height:92dvh;overflow:auto;border-radius:22px 22px 0 0;padding:20px 20px calc(20px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:14px;overscroll-behavior:contain}
+.sh h2{margin:0;font-size:20px;font-weight:800}
+@media (min-width:560px){.ov{align-items:center;padding:20px}.sh{border-radius:22px}}
+#toast{position:fixed;left:50%;bottom:calc(92px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--ink);color:#fff;padding:12px 16px;border-radius:14px;font-size:14px;font-weight:700;z-index:60;opacity:0;pointer-events:none;transition:opacity .2s;width:max-content;max-width:calc(100% - 32px);text-align:center}
+#toast.on{opacity:1}
+</style>
+</head>
+<body>
+<div id="app">
+  <main id="main"><div class="scr center"><p class="hint" style="text-align:center">Caricamento…</p></div></main>
+  <nav id="nav" hidden aria-label="Navigazione principale"><div class="in">
+    <a href="#home" data-tab="home"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Oggi</a>
+    <a href="#riscaldamento" data-tab="riscaldamento"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h4l3-7 4 14 3-7h4"/></svg>Riscaldamento</a>
+    <a href="#progressi" data-tab="progressi"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18M6 17v-6M12 17V5M18 17v-9"/></svg>Progressi</a>
+    <a href="#scheda" data-tab="scheda"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V3h6v1M9 10h6M9 14h6"/></svg>Scheda</a>
+  </div></nav>
+</div>
+<div id="sheet-root"></div>
+<div id="toast" role="status" aria-live="polite"></div>
+
+<!-- Scheda iniziale: viene caricata solo al primissimo accesso -->
+<script type="application/json" id="scheda-iniziale">
+{"schemaVersion":1,"nome":"Scheda Ipertrofia – Marco Vaccarone","obiettivo":"Ipertrofia","settimane":6,"riscaldamento":[{"sezione":"Foam rolling","esercizi":[{"nome":"Quadricipiti con foam roller","prescrizione":"1x12 per lato","videoUrl":"https://www.youtube.com/watch?v=ERTVBjwgPS4"},{"nome":"Glutei con foam roller","prescrizione":"1x12 per lato","videoUrl":"https://www.youtube.com/watch?v=7HL8QZMQ4YM"},{"nome":"Gran dorsale con foam roller","prescrizione":"1x12 per lato","videoUrl":"https://www.youtube.com/watch?v=1GaR-a9TWYM"},{"nome":"Pettorale con pallina da tennis","prescrizione":"1x12 per lato","videoUrl":"https://www.youtube.com/watch?v=3mCyDqfNnqY"}]},{"sezione":"Mobilità","esercizi":[{"nome":"Rotazione toracica in quadrupedia","prescrizione":"1x8 per lato","videoUrl":"https://www.youtube.com/watch?v=snzLuyYgbVI"},{"nome":"Gatto-cammello","prescrizione":"1x8","videoUrl":"https://www.youtube.com/watch?v=SMAYXfZn_6M"},{"nome":"90-90","prescrizione":"1x8 per lato, alternate","videoUrl":"https://www.youtube.com/watch?v=YxECcOkUCEY"},{"nome":"Circonduzione spalle con bastone","prescrizione":"1x8","videoUrl":"https://www.youtube.com/watch?v=vQjlYoZCz50"}]},{"sezione":"Attivazione","esercizi":[{"nome":"Dead Bug","prescrizione":"2x10 per lato, alternate","videoUrl":"https://www.youtube.com/watch?v=g_BYB0R-4Ws"},{"nome":"Side Plank","prescrizione":"2x30'' per lato","videoUrl":"https://www.youtube.com/watch?v=f4jRjogvV-k"},{"nome":"Glute Bridge","prescrizione":"2x15","videoUrl":"https://www.youtube.com/watch?v=tqp5XQPpTxY"},{"nome":"Monster walk con mini band","prescrizione":"2x10 passi avanti e indietro","videoUrl":"https://www.youtube.com/shorts/Ss43G67pjPc"}]}],"giorni":[{"id":"A","nome":"Giorno A","esercizi":[{"nome":"High bar box squat","categoria":"Main lift","tipoCarico":"kg","perLato":false,"settimane":[{"serie":3,"ripetizioni":10},{"serie":4,"ripetizioni":8},{"serie":4,"ripetizioni":8},{"serie":5,"ripetizioni":6},{"serie":5,"ripetizioni":6},{"serie":3,"ripetizioni":12,"nota":"scarico"}],"rir":"3","tempo":"2''/1''/2''","recuperoSec":120,"note":"","videoUrl":"https://www.youtube.com/watch?v=ZJrUiIprYVw"},{"nome":"Panca 45° con manubri","categoria":"Multiarticolari","tipoCarico":"kg","perLato":false,"settimane":[{"serie":3,"ripetizioni":10},{"serie":3,"ripetizioni":10},{"serie":4,"ripetizioni":8},{"serie":4,"ripetizioni":8},{"serie":3,"ripetizioni":12},{"serie":3,"ripetizioni":12}],"rir":"2","tempo":"","recuperoSec":90,"note":"","videoUrl":"https://www.youtube.com/watch?v=IP4oeKh1Sd4"},{"nome":"Trazioni prone con elastico","categoria":"Multiarticolari","tipoCarico":"elastico","perLato":false,"settimane":[{"serie":3,"ripetizioni":10},{"serie":3,"ripetizioni":10},{"serie":4,"ripetizioni":8},{"serie":4,"ripetizioni":8},{"serie":3,"ripetizioni":12},{"serie":3,"ripetizioni":12}],"rir":"2","tempo":"","recuperoSec":90,"note":"","videoUrl":"https://www.youtube.com/watch?v=9mVNP1_kDBs"},{"nome":"Affondi bulgari","categoria":"Multiarticolari","tipoCarico":"kg","perLato":true,"settimane":[{"serie":3,"ripetizioni":10},{"serie":3,"ripetizioni":10},{"serie":4,"ripetizioni":8},{"serie":4,"ripetizioni":8},{"serie":3,"ripetizioni":12},{"serie":3,"ripetizioni":12}],"rir":"2","tempo":"","recuperoSec":90,"note":"","videoUrl":"https://www.youtube.com/watch?v=bwhl_9jN_3o"},{"nome":"Alzate laterali con manubri","categoria":"Monoarticolari","tipoCarico":"kg","perLato":false,"settimane":[{"serie":2,"ripetizioni":10},{"serie":2,"ripetizioni":10},{"serie":2,"ripetizioni":11},{"serie":2,"ripetizioni":11},{"serie":2,"ripetizioni":12},{"serie":2,"ripetizioni":12}],"rir":"0-1","tempo":"","recuperoSec":60,"note":"","videoUrl":"https://www.youtube.com/watch?v=Y29xKcze8Ik"},{"nome":"Leg curl","categoria":"Monoarticolari","tipoCarico":"kg","perLato":false,"settimane":[{"serie":2,"ripetizioni":10},{"serie":2,"ripetizioni":10},{"serie":2,"ripetizioni":11},{"serie":2,"ripetizioni":11},{"serie":2,"ripetizioni":12},{"serie":2,"ripetizioni":12}],"rir":"0-1","tempo":"","recuperoSec":60,"note":"","videoUrl":"https://www.youtube.com/watch?v=1zevKZn_n1E"},{"nome":"Curl bicipiti in piedi","categoria":"Monoarticolari","tipoCarico":"kg","perLato":false,"settimane":[{"serie":2,"ripetizioni":10},{"serie":2,"ripetizioni":10},{"serie":2,"ripetizioni":11},{"serie":2,"ripetizioni":11},{"serie":2,"ripetizioni":12},{"serie":2,"ripetizioni":12}],"rir":"0-1","tempo":"","recuperoSec":60,"note":"","videoUrl":"https://www.youtube.com/watch?v=QaXCjUMCp90"},{"nome":"Face pull","categoria":"Prevenzione","tipoCarico":"kg","perLato":false,"settimane":[{"serie":1,"ripetizioni":15},{"serie":1,"ripetizioni":16},{"serie":1,"ripetizioni":17},{"serie":1,"ripetizioni":18},{"serie":1,"ripetizioni":19},{"serie":1,"ripetizioni":20}],"rir":"3","tempo":"","recuperoSec":0,"note":"","videoUrl":"https://www.youtube.com/watch?v=0Po47vvj9g4"}]},{"id":"B","nome":"Giorno B","esercizi":[{"nome":"Panca piana con bilanciere","categoria":"Main lift","tipoCarico":"kg","perLato":false,"settimane":[{"serie":3,"ripetizioni":10},{"serie":4,"ripetizioni":8},{"serie":4,"ripetizioni":8},{"serie":5,"ripetizioni":6},{"serie":5,"ripetizioni":6},{"serie":3,"ripetizioni":12,"nota":"scarico"}],"rir":"3","tempo":"2''/1''/1''","recuperoSec":120,"note":"","videoUrl":"https://www.youtube.com/watch?v=gRVjAtPip0Y"},{"nome":"Stacco rumeno ad una gamba","categoria":"Multiarticolari","tipoCarico":"kg","perLato":true,"settimane":[{"serie":3,"ripetizioni":10},{"serie":3,"ripetizioni":10},{"serie":4,"ripetizioni":8},{"serie":4,"ripetizioni":8},{"serie":3,"ripetizioni":12},{"serie":3,"ripetizioni":12}],"rir":"2","tempo":"","recuperoSec":90,"note":"Variante utile a percepire meglio lo stretch sugli ischiocrurali rispetto alla tensione sulla zona lombare","videoUrl":"https://www.youtube.com/watch?v=4I6txKzGkzk"},{"nome":"Pulley","categoria":"Multiarticolari","tipoCarico":"kg","perLato":false,"settimane":[{"serie":3,"ripetizioni":10},{"serie":3,"ripetizioni":10},{"serie":4,"ripetizioni":8},{"serie":4,"ripetizioni":8},{"serie":3,"ripetizioni":12},{"serie":3,"ripetizioni":12}],"rir":"2","tempo":"","recuperoSec":90,"note":"","videoUrl":"https://www.youtube.com/watch?v=vwHG9Jfu4sw"},{"nome":"Piegamenti sulle braccia","categoria":"Multiarticolari","tipoCarico":"corpo_libero","perLato":false,"settimane":[{"serie":3,"ripetizioni":10},{"serie":3,"ripetizioni":10},{"serie":4,"ripetizioni":8},{"serie":4,"ripetizioni":8},{"serie":3,"ripetizioni":12},{"serie":3,"ripetizioni":12}],"rir":"2","tempo":"","recuperoSec":90,"note":"","videoUrl":"https://www.youtube.com/watch?v=iIg9B3lcea0"},{"nome":"Push down al cavo alto","categoria":"Monoarticolari","tipoCarico":"kg","perLato":false,"settimane":[{"serie":2,"ripetizioni":10},{"serie":2,"ripetizioni":10},{"serie":2,"ripetizioni":11},{"serie":2,"ripetizioni":11},{"serie":2,"ripetizioni":12},{"serie":2,"ripetizioni":12}],"rir":"0-1","tempo":"","recuperoSec":60,"note":"","videoUrl":"https://www.youtube.com/watch?v=nMqQNGo4Jtg"},{"nome":"Calf raises al multipower","categoria":"Monoarticolari","tipoCarico":"kg","perLato":false,"settimane":[{"serie":2,"ripetizioni":10},{"serie":2,"ripetizioni":10},{"serie":2,"ripetizioni":11},{"serie":2,"ripetizioni":11},{"serie":2,"ripetizioni":12},{"serie":2,"ripetizioni":12}],"rir":"0-1","tempo":"","recuperoSec":60,"note":"","videoUrl":"https://www.youtube.com/watch?v=Gti0nc0E2jI"},{"nome":"Rotazione esterna con elastico, braccio abdotto a 90°","categoria":"Prevenzione","tipoCarico":"elastico","perLato":false,"settimane":[{"serie":1,"ripetizioni":15},{"serie":1,"ripetizioni":16},{"serie":1,"ripetizioni":17},{"serie":1,"ripetizioni":18},{"serie":1,"ripetizioni":19},{"serie":1,"ripetizioni":20}],"rir":"3","tempo":"","recuperoSec":0,"note":"","videoUrl":"https://www.youtube.com/watch?v=IZiEnz6pPO4"}]},{"id":"C","nome":"Giorno C","esercizi":[{"nome":"Lat machine","categoria":"Main lift","tipoCarico":"kg","perLato":false,"settimane":[{"serie":3,"ripetizioni":10},{"serie":4,"ripetizioni":8},{"serie":4,"ripetizioni":8},{"serie":5,"ripetizioni":6},{"serie":5,"ripetizioni":6},{"serie":3,"ripetizioni":12,"nota":"scarico"}],"rir":"3","tempo":"2''/1''/2''","recuperoSec":120,"note":"","videoUrl":"https://www.youtube.com/watch?v=7JnP8dFbS14"},{"nome":"Affondi per dietro con manubri","categoria":"Multiarticolari","tipoCarico":"kg","perLato":true,"settimane":[{"serie":3,"ripetizioni":10},{"serie":3,"ripetizioni":10},{"serie":4,"ripetizioni":8},{"serie":4,"ripetizioni":8},{"serie":3,"ripetizioni":12},{"serie":3,"ripetizioni":12}],"rir":"2","tempo":"","recuperoSec":90,"note":"","videoUrl":"https://www.youtube.com/watch?v=Q2k3kYbtOcI"},{"nome":"Dips su panca","categoria":"Multiarticolari","tipoCarico":"corpo_libero","perLato":false,"settimane":[{"serie":3,"ripetizioni":10},{"serie":3,"ripetizioni":10},{"serie":4,"ripetizioni":8},{"serie":4,"ripetizioni":8},{"serie":3,"ripetizioni":12},{"serie":3,"ripetizioni":12}],"rir":"2","tempo":"","recuperoSec":90,"note":"","videoUrl":"https://www.youtube.com/watch?v=lPXJMzFXFvc"},{"nome":"Rematore con manubri su panca","categoria":"Multiarticolari","tipoCarico":"kg","perLato":true,"settimane":[{"serie":3,"ripetizioni":10},{"serie":3,"ripetizioni":10},{"serie":4,"ripetizioni":8},{"serie":4,"ripetizioni":8},{"serie":3,"ripetizioni":12},{"serie":3,"ripetizioni":12}],"rir":"2","tempo":"","recuperoSec":90,"note":"","videoUrl":"https://www.youtube.com/watch?v=dFzUjzfih7k"},{"nome":"Hammer curl","categoria":"Monoarticolari","tipoCarico":"kg","perLato":false,"settimane":[{"serie":2,"ripetizioni":10},{"serie":2,"ripetizioni":10},{"serie":2,"ripetizioni":11},{"serie":2,"ripetizioni":11},{"serie":2,"ripetizioni":12},{"serie":2,"ripetizioni":12}],"rir":"0-1","tempo":"","recuperoSec":60,"note":"","videoUrl":"https://www.youtube.com/watch?v=CFBZ4jN1CMI"},{"nome":"Leg extension","categoria":"Monoarticolari","tipoCarico":"kg","perLato":false,"settimane":[{"serie":2,"ripetizioni":10},{"serie":2,"ripetizioni":10},{"serie":2,"ripetizioni":11},{"serie":2,"ripetizioni":11},{"serie":2,"ripetizioni":12},{"serie":2,"ripetizioni":12}],"rir":"0-1","tempo":"","recuperoSec":60,"note":"","videoUrl":"https://www.youtube.com/watch?v=4ZDm5EbiFI8"}]}]}
+</script>
+
+<script type="module">
+// =====================================================================
+//  CONFIGURAZIONE FIREBASE
+//  Incolla qui i valori che trovi nella console Firebase
+//  (Impostazioni progetto > Le tue app > Configurazione SDK).
+//  Finché apiKey è vuoto l'app gira in "modalità prova": i dati restano
+//  solo in questo browser.
+// =====================================================================
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyB8FI4ECMeVFDP9NF8JwgGMGYshc4oOVoE",
+  authDomain: "palestra-marco.firebaseapp.com",
+  projectId: "palestra-marco",
+  storageBucket: "palestra-marco.firebasestorage.app",
+  messagingSenderId: "672656492720",
+  appId: "1:672656492720:web:20458e9de9ae48dc3d9375"
+};
+const FB_URL = 'https://www.gstatic.com/firebasejs/10.12.2/';
+
+const CATEGORIE = ['Main lift', 'Multiarticolari', 'Monoarticolari', 'Prevenzione'];
+const TIPI = { kg: 'Pesi (kg)', corpo_libero: 'Corpo libero', elastico: 'Elastico' };
+const TIPO_BACKUP = 'backup-scheda-palestra';
+
+// ---------- utilità ----------
+const $ = s => document.querySelector(s);
+const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const str = v => v == null ? '' : String(v).trim();
+const norm = s => str(s).replace(/\s+/g, ' ').toLowerCase();
+const rid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+const clone = o => JSON.parse(JSON.stringify(o));
+// formato italiano con il punto delle migliaia anche sui numeri a 4 cifre (es. 8.400)
+const migliaia = s => s.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+const fmtN = n => { const [i, d] = (Math.round(n * 10) / 10).toFixed(1).split('.'); return migliaia(i) + (d !== '0' ? ',' + d : ''); };
+const fmtInt = n => migliaia(String(Math.round(n)));
+const parseNum = v => { const n = parseFloat(String(v ?? '').replace(',', '.')); return Number.isFinite(n) ? n : null; };
+const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
+const mmss = s => String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0');
+const fmtRec = sec => { if (!sec) return ''; const m = Math.floor(sec / 60), s = sec % 60; return (m ? m + "'" : '') + (s ? s + "''" : ''); };
+const dataBreve = d => d.getDate() + ' ' + d.toLocaleDateString('it-IT', { month: 'short' }).replace('.', '');
+const oggiISO = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
+
+const IC = {
+  check: '<path d="M5 12l5 5L19 7"/>', arrowR: '<path d="M5 12h14M13 6l6 6-6 6"/>',
+  chevR: '<path d="M9 6l6 6-6 6"/>', chevL: '<path d="M15 6l-6 6 6 6"/>',
+  pencil: '<path d="M4 20h4L19 9l-4-4L4 16z"/>', plus: '<path d="M12 5v14M5 12h14"/>',
+  ext: '<path d="M14 4h6v6M20 4l-10 10M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/>',
+  up: '<path d="M12 19V5M6 11l6-6 6 6"/>', down: '<path d="M12 5v14M6 13l6 6 6-6"/>',
+  download: '<path d="M12 4v11M7 10l5 5 5-5M5 20h14"/>', upload: '<path d="M12 16V5M7 10l5-5 5 5M5 20h14"/>',
+  file: '<path d="M14 3H6v18h12V7z"/><path d="M14 3v4h4M9 13h6M9 17h6"/>',
+  logout: '<path d="M15 4h4v16h-4M10 8l-4 4 4 4M6 12h11"/>', pulse: '<path d="M3 12h4l3-7 4 14 3-7h4"/>',
+  trash: '<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>', user: '<circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/>'
+};
+const ico = (n, s = 22, w = 2, col = 'currentColor') => `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="${col}" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${IC[n]}</svg>`;
+const play = (s, col) => `<svg width="${s}" height="${s}" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z" fill="${col}"/></svg>`;
+
+function ytId(url) {
+  const m = str(url).match(/(?:youtube\.com\/(?:watch\?(?:[^#]*&)?v=|shorts\/|embed\/|live\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);
+  return m ? m[1] : null;
+}
+function miniatura(url) {
+  const id = ytId(url);
+  const img = id ? `<img src="https://img.youtube.com/vi/${id}/hqdefault.jpg" alt="" loading="lazy" onerror="this.remove()">` : '';
+  const inner = `${img}<span class="pl">${play(16, '#FFFFFF')}</span>`;
+  return url ? `<a class="thumb" href="${esc(url)}" target="_blank" rel="noopener" aria-label="Apri il video su YouTube">${inner}</a>` : `<div class="thumb">${inner}</div>`;
+}
+
+let toastT;
+function toast(msg) { const t = $('#toast'); t.textContent = msg; t.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('on'), 2600); }
+
+// ---------- validazione della scheda ----------
+function validaScheda(d) {
+  const err = [];
+  if (!d || typeof d !== 'object' || Array.isArray(d)) return { errori: ['Il file non contiene una scheda: mi aspettavo un oggetto JSON con "settimane" e "giorni".'] };
+  const nS = Number(d.settimane);
+  if (!Number.isInteger(nS) || nS < 1 || nS > 52) err.push('"settimane" (in cima al file) deve essere un numero intero da 1 a 52.');
+  const out = { schemaVersion: 1, nome: str(d.nome) || 'Scheda', obiettivo: str(d.obiettivo), settimane: nS, riscaldamento: [], giorni: [] };
+  if (d.riscaldamento != null) {
+    if (!Array.isArray(d.riscaldamento)) err.push('"riscaldamento" deve essere un elenco di sezioni.');
+    else d.riscaldamento.forEach((s, i) => {
+      const dove = `Riscaldamento, sezione ${i + 1}`;
+      if (!s || typeof s !== 'object') { err.push(`${dove}: non è valida.`); return; }
+      const sez = { sezione: str(s.sezione) || `Sezione ${i + 1}`, esercizi: [] };
+      if (!Array.isArray(s.esercizi)) err.push(`${dove} (${sez.sezione}): manca l'elenco "esercizi".`);
+      else s.esercizi.forEach((e, j) => {
+        if (!e || !str(e.nome)) { err.push(`${dove} (${sez.sezione}), esercizio ${j + 1}: manca il "nome".`); return; }
+        sez.esercizi.push({ nome: str(e.nome), prescrizione: str(e.prescrizione), videoUrl: str(e.videoUrl) });
+      });
+      out.riscaldamento.push(sez);
+    });
+  }
+  if (!Array.isArray(d.giorni) || !d.giorni.length) err.push('"giorni" deve essere un elenco con almeno un giorno (es. A, B, C).');
+  else {
+    const ids = new Set();
+    d.giorni.forEach((g, i) => {
+      const id = str(g?.id);
+      const dove = `Giorno ${id || i + 1}`;
+      if (!id) err.push(`Giorno ${i + 1}: manca l'"id" (es. "A").`);
+      else if (ids.has(id)) err.push(`${dove}: l'id "${id}" compare due volte.`);
+      ids.add(id);
+      const gg = { id: id || String(i + 1), nome: str(g?.nome) || `Giorno ${id || i + 1}`, esercizi: [] };
+      if (!Array.isArray(g?.esercizi) || !g.esercizi.length) err.push(`${dove}: deve avere almeno un esercizio in "esercizi".`);
+      else g.esercizi.forEach((e, j) => {
+        const r = validaEsercizio(e, nS, `${dove}, esercizio ${j + 1}${str(e?.nome) ? ` (${str(e.nome)})` : ''}`, err);
+        if (r) gg.esercizi.push(r);
+      });
+      out.giorni.push(gg);
+    });
+  }
+  return err.length ? { errori: err } : { scheda: out };
+}
+function validaEsercizio(e, nS, dove, err) {
+  if (!e || typeof e !== 'object') { err.push(`${dove}: non è valido.`); return null; }
+  const n0 = err.length;
+  const nome = str(e.nome);
+  if (!nome) err.push(`${dove}: manca il "nome".`);
+  const tipo = e.tipoCarico == null || e.tipoCarico === '' ? 'kg' : e.tipoCarico;
+  if (!TIPI[tipo]) err.push(`${dove}: "tipoCarico" deve essere "kg", "corpo_libero" oppure "elastico" (c'è scritto "${tipo}").`);
+  if (e.perLato != null && typeof e.perLato !== 'boolean') err.push(`${dove}: "perLato" deve essere true oppure false.`);
+  const sett = [];
+  if (!Array.isArray(e.settimane)) err.push(`${dove}: manca l'elenco "settimane".`);
+  else {
+    if (Number.isInteger(nS) && e.settimane.length !== nS) err.push(`${dove}: "settimane" deve avere ${nS} elementi, uno per settimana (ne ha ${e.settimane.length}).`);
+    e.settimane.forEach((w, k) => {
+      const se = Number(w?.serie), ri = Number(w?.ripetizioni);
+      if (!Number.isInteger(se) || se < 1) err.push(`${dove}, settimana ${k + 1}: "serie" deve essere un numero intero maggiore di 0.`);
+      if (!Number.isInteger(ri) || ri < 1) err.push(`${dove}, settimana ${k + 1}: "ripetizioni" deve essere un numero intero maggiore di 0.`);
+      const o = { serie: se, ripetizioni: ri };
+      if (str(w?.nota)) o.nota = str(w.nota);
+      sett.push(o);
+    });
+  }
+  const rec = e.recuperoSec == null || e.recuperoSec === '' ? 0 : Number(e.recuperoSec);
+  if (!Number.isInteger(rec) || rec < 0) err.push(`${dove}: "recuperoSec" deve essere un numero intero di secondi (0 se non indicato).`);
+  if (err.length > n0) return null;
+  return { nome, categoria: str(e.categoria) || 'Altro', tipoCarico: tipo, perLato: !!e.perLato, settimane: sett, rir: str(e.rir), tempo: str(e.tempo), recuperoSec: rec, note: str(e.note), videoUrl: str(e.videoUrl) };
+}
+function erroriHtml(errori) {
+  const max = 15, extra = errori.length - max;
+  return `<div class="err">Ho trovato ${errori.length === 1 ? 'un problema' : errori.length + ' problemi'}:<ul>${errori.slice(0, max).map(e => `<li>${esc(e)}</li>`).join('')}</ul>${extra > 0 ? `<div>…e altri ${extra}.</div>` : ''}</div>`;
+}
+
+// ---------- archivi dati ----------
+const pulisci = o => JSON.parse(JSON.stringify(o));
+
+function creaArchivioLocale() {
+  const K = 'palestra-prova-v1';
+  const leggi = () => { try { return JSON.parse(localStorage.getItem(K)) || {}; } catch { return {}; } };
+  const scrivi = d => { try { localStorage.setItem(K, JSON.stringify(d)); } catch { toast('Il browser non riesce a salvare i dati di prova'); } };
+  return {
+    locale: true,
+    async carica() { const d = leggi(); return { stato: d.stato || null, sessioni: d.sessioni || [], note: d.note || {} }; },
+    async salvaStato(s) { const d = leggi(); d.stato = pulisci(s); scrivi(d); },
+    async salvaSessione(s) { const d = leggi(); d.sessioni = (d.sessioni || []).filter(x => x.id !== s.id); d.sessioni.push(pulisci(s)); scrivi(d); },
+    async salvaNota(k, v) { const d = leggi(); d.note = d.note || {}; if (v) d.note[k] = v; else delete d.note[k]; scrivi(d); },
+    async sostituisciTutto(b) { scrivi(pulisci(b)); },
+    async cancellaTutto() { try { localStorage.removeItem(K); } catch { } }
+  };
+}
+
+let FBX = null;
+function creaArchivioFirebase(utente) {
+  const { doc, getDoc, setDoc, deleteDoc, collection, getDocs, writeBatch } = FBX.F;
+  const db = FBX.db;
+  const docStato = doc(db, 'utenti', utente.uid, 'dati', 'stato');
+  const colSess = collection(db, 'utenti', utente.uid, 'sessioni');
+  const colNote = collection(db, 'utenti', utente.uid, 'noteEsercizi');
+  const idNota = k => encodeURIComponent(k).slice(0, 1400) || 'vuoto';
+  return {
+    locale: false,
+    async carica() {
+      const [s, ss, nn] = await Promise.all([getDoc(docStato), getDocs(colSess), getDocs(colNote)]);
+      const note = {};
+      nn.forEach(d => { const v = d.data(); if (v?.nome) note[norm(v.nome)] = v; });
+      return { stato: s.exists() ? s.data() : null, sessioni: ss.docs.map(d => d.data()), note };
+    },
+    salvaStato: s => setDoc(docStato, pulisci(s)),
+    salvaSessione: s => setDoc(doc(colSess, s.id), pulisci(s)),
+    salvaNota: (k, v) => v ? setDoc(doc(colNote, idNota(k)), pulisci(v)) : deleteDoc(doc(colNote, idNota(k))),
+    async sostituisciTutto(b) {
+      const [ss, nn] = await Promise.all([getDocs(colSess), getDocs(colNote)]);
+      const ops = [];
+      ss.forEach(d => ops.push(bt => bt.delete(d.ref)));
+      nn.forEach(d => ops.push(bt => bt.delete(d.ref)));
+      b.sessioni.forEach(s => ops.push(bt => bt.set(doc(colSess, s.id), pulisci(s))));
+      Object.entries(b.note).forEach(([k, v]) => ops.push(bt => bt.set(doc(colNote, idNota(k)), pulisci(v))));
+      for (let i = 0; i < ops.length; i += 400) {
+        const bt = writeBatch(db);
+        ops.slice(i, i + 400).forEach(f => f(bt));
+        await bt.commit();
+      }
+      await setDoc(docStato, pulisci(b.stato));
+    }
+  };
+}
+
+// ---------- stato dell'app ----------
+const S = {
+  archivio: null, stato: null, sessioni: [], note: {}, utente: null,
+  giornoScelto: null, prog: { periodo: 'mese', offset: 0, es: null, gran: null },
+  modTab: null, importa: null, importaTesto: '', grafici: []
+};
+const sess = () => S.stato?.sessioneInCorso || null;
+const giornoScheda = id => S.stato.scheda.giorni.find(g => g.id === id);
+const esDaUid = uid => sess()?.esercizi.find(e => e.uid === uid);
+function pianoSett(e) { const w = Math.min(S.stato.settimana, e.settimane.length) - 1; return e.settimane[Math.max(0, w)]; }
+function prossimoGiorno() {
+  const g = S.stato.scheda.giorni;
+  const i = g.findIndex(x => x.id === S.stato.ultimoGiorno);
+  return g[(i + 1) % g.length].id;
+}
+function statoIniziale() {
+  const v = validaScheda(JSON.parse($('#scheda-iniziale').textContent));
+  return { scheda: v.scheda, settimana: 1, ultimoGiorno: null, completati: [], precedente: null, sessioneInCorso: null };
+}
+function completaStato(st) {
+  const s = { settimana: 1, ultimoGiorno: null, completati: [], precedente: null, sessioneInCorso: null, ...st };
+  s.settimana = Math.min(Math.max(1, s.settimana | 0), s.scheda.settimane);
+  return s;
+}
+
+let salvaT = null;
+function salva() { clearTimeout(salvaT); salvaT = setTimeout(scriviStato, 400); }
+async function scriviStato() {
+  clearTimeout(salvaT); salvaT = null;
+  try { await S.archivio.salvaStato(S.stato); }
+  catch (e) { console.error(e); toast('Salvataggio non riuscito: controlla la connessione'); }
+}
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden' && salvaT) scriviStato(); });
+window.addEventListener('pagehide', () => { if (salvaT) scriviStato(); });
+
+// ---------- navigazione ----------
+function vai(r) { if (location.hash === '#' + r) render(); else location.hash = r; }
+function rotta() { const h = decodeURIComponent(location.hash.slice(1)) || 'home'; const i = h.indexOf('/'); return i < 0 ? { nome: h, arg: null } : { nome: h.slice(0, i), arg: h.slice(i + 1) }; }
+window.addEventListener('hashchange', () => { chiudiFoglio(); render(); window.scrollTo(0, 0); });
+
+const VISTE = {};
+const DOPO = {};
+function render() {
+  if (!S.stato) return;
+  distruggiGrafici();
+  let { nome, arg } = rotta();
+  if ((nome === 'giorno' || nome === 'esercizio') && !sess()) nome = 'home';
+  if (nome === 'esercizio' && !esDaUid(arg)) nome = 'giorno';
+  if (!VISTE[nome]) nome = 'home';
+  const tab = { home: 'home', riscaldamento: 'riscaldamento', progressi: 'progressi', scheda: 'scheda', modifica: 'scheda', importa: 'scheda' }[nome];
+  $('#main').innerHTML = VISTE[nome](arg);
+  $('#nav').hidden = !tab;
+  document.querySelectorAll('#nav a').forEach(a => { if (a.dataset.tab === tab) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
+  DOPO[nome]?.(arg);
+}
+function schermata(html) { $('#nav').hidden = true; $('#main').innerHTML = html; }
+
+// ---------- fogli (pannelli dal basso) ----------
+let confermaRes = null;
+function apriFoglio(html) {
+  if (confermaRes) { const r = confermaRes; confermaRes = null; r(false); }
+  $('#sheet-root').innerHTML = `<div class="ov"><div class="sh" role="dialog" aria-modal="true">${html}</div></div>`;
+  document.body.style.overflow = 'hidden';
+}
+function chiudiFoglio() {
+  $('#sheet-root').innerHTML = '';
+  document.body.style.overflow = '';
+  if (confermaRes) { const r = confermaRes; confermaRes = null; r(false); }
+}
+function conferma({ titolo, testo, ok = 'Conferma', annulla = 'Annulla', pericolo = false }) {
+  return new Promise(res => {
+    apriFoglio(`<h2>${esc(titolo)}</h2>${testo ? `<p class="txt">${esc(testo)}</p>` : ''}
+      <button class="${pericolo ? 'btn-danger full' : 'btn-pri'}" data-a="confermaOk">${esc(ok)}</button>
+      <button class="btn-sec" data-a="chiudiFoglio">${esc(annulla)}</button>`);
+    confermaRes = res;
+  });
+}
+function avviso(titolo, corpoHtml) {
+  apriFoglio(`<h2>${esc(titolo)}</h2>${corpoHtml}<button class="btn-sec" data-a="chiudiFoglio">Ho capito</button>`);
+}
+
+// ---------- azioni (click / input / change) ----------
+const A = {}, IN = {}, CH = {};
+document.addEventListener('click', e => {
+  if (e.target.classList?.contains('ov')) { chiudiFoglio(); return; }
+  const el = e.target.closest('[data-a]');
+  if (!el || el.disabled) return;
+  const f = A[el.dataset.a];
+  if (f) { e.preventDefault(); f(el, e); }
+});
+document.addEventListener('input', e => { const el = e.target.closest('[data-in]'); if (el) IN[el.dataset.in]?.(el, e); });
+document.addEventListener('change', e => { const el = e.target.closest('[data-ch]'); if (el) CH[el.dataset.ch]?.(el, e); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && $('#sheet-root').innerHTML) chiudiFoglio(); });
+A.chiudiFoglio = () => chiudiFoglio();
+A.confermaOk = () => { const r = confermaRes; confermaRes = null; chiudiFoglio(); r?.(true); };
+A.vai = el => vai(el.dataset.r);
+
+// =====================================================================
+//  HOME
+// =====================================================================
+function bannerProva() {
+  return S.archivio?.locale ? `<div class="banner">Modalità prova: i dati restano solo in questo browser. Per salvarli online inserisci la configurazione Firebase (vedi la guida).</div>` : '';
+}
+function settimanaDiScarico() {
+  return S.stato.scheda.giorni.some(g => g.esercizi.some(e => /scarico/i.test(pianoSett(e)?.nota || '')));
+}
+VISTE.home = () => {
+  const st = S.stato, sc = st.scheda, n = sc.settimane, s = sess();
+  const prox = prossimoGiorno();
+  const sel = s ? s.giorno : S.giornoScelto && giornoScheda(S.giornoScelto) ? S.giornoScelto : prox;
+  const g = giornoScheda(sel);
+  const nomeUtente = S.utente?.displayName ? S.utente.displayName.split(' ')[0] : '';
+  const data = cap(new Date().toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'long' }));
+
+  const barre = Array.from({ length: n }, (_, i) => `<span class="${i + 1 < st.settimana ? 'past' : i + 1 === st.settimana ? 'cur' : ''}"></span>`).join('');
+  const giorni = sc.giorni.map(d => {
+    const fatto = st.completati.includes(d.id), scelto = d.id === sel;
+    const etichetta = s && scelto ? 'In corso' : fatto ? `${ico('check', 14, 3)}Fatto` : scelto ? (d.id === prox ? 'Prossimo' : 'Scelto') : (d.id === prox ? 'Prossimo' : 'Da fare');
+    return `<button class="day${fatto ? ' done' : ''}${scelto ? ' sel' : ''}" data-a="scegliGiorno" data-id="${esc(d.id)}" aria-pressed="${scelto}">
+      <span class="l">${esc(d.id)}</span><span class="s">${etichetta}</span></button>`;
+  }).join('');
+
+  let cta;
+  if (s) {
+    const fatti = s.esercizi.filter(e => e.stato !== 'da_fare').length;
+    const ora = new Date(s.inizio).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+    cta = `<a class="cta" href="#giorno" style="text-decoration:none"><span><span class="t">Riprendi ${esc(s.nomeGiorno)}</span>
+      <span class="st">${fatti} di ${s.esercizi.length} esercizi fatti · iniziato alle ${ora}</span></span>${ico('arrowR', 26, 2.5)}</a>`;
+  } else {
+    const primo = g.esercizi[0], p = pianoSett(primo);
+    cta = `<button class="cta" data-a="iniziaGiorno" data-id="${esc(g.id)}"><span><span class="t">Inizia ${esc(g.nome)}</span>
+      <span class="st">${g.esercizi.length} esercizi · si parte con ${esc(primo.nome)} ${p.serie} × ${p.ripetizioni}</span></span>${ico('arrowR', 26, 2.5)}</button>`;
+  }
+
+  const ultima = st.settimana >= n;
+  const indietro = st.settimana > 1 ? st.settimana - 1 : (st.precedente ? st.precedente.settimana : null);
+  return `<div class="scr">
+    ${bannerProva()}
+    <div class="head"><span class="date">${esc(data)}</span><h1 class="big">Ciao${nomeUtente ? ' ' + esc(nomeUtente) : ''}</h1></div>
+    <div class="card">
+      <div class="between">
+        <div class="head"><span class="eyebrow">Scheda attiva</span><span style="font-size:17px;font-weight:800">${esc(sc.obiettivo || sc.nome)}</span></div>
+        <span class="num" style="font-size:22px;white-space:nowrap">Settimana ${st.settimana} <span style="color:var(--mut);font-weight:600">di ${n}</span></span>
+      </div>
+      <div class="weekbar" style="grid-template-columns:repeat(${n},minmax(0,1fr))">${barre}</div>
+      ${settimanaDiScarico() ? '<span class="tag-scarico">Settimana di scarico</span>' : ''}
+      <div class="days" style="grid-template-columns:repeat(${Math.min(sc.giorni.length, 4)},minmax(0,1fr))">${giorni}</div>
+      <p class="hint" style="margin-top:-6px;text-align:center;font-size:12px">${s ? 'Tocca un altro giorno per cambiare allenamento' : 'Tocca un giorno per sceglierne un altro'}</p>
+    </div>
+    ${cta}
+    <a class="link-row" href="#riscaldamento">
+      <span class="ic">${ico('pulse')}</span>
+      <span class="tx"><span class="t">Riscaldamento</span><span class="st">${esc(sc.riscaldamento.map(r => r.sezione).join(' · ') || 'Nessun esercizio')}</span></span>
+      ${ico('chevR', 20, 2, '#5A5F69')}
+    </a>
+    <div class="card" style="padding:16px;gap:12px">
+      <span style="font-size:14px;font-weight:600;color:var(--mut)">Hai finito la settimana ${st.settimana}?</span>
+      <button class="btn-out" data-a="settAvanti">${ultima ? 'Ricomincia dalla settimana 1' : `Passa alla settimana ${st.settimana + 1}`}</button>
+      ${indietro ? `<button class="btn-txt" data-a="settIndietro">Torna alla settimana ${indietro}</button>` : ''}
+    </div>
+  </div>`;
+};
+A.scegliGiorno = async el => {
+  const id = el.dataset.id, s = sess();
+  if (!s) { S.giornoScelto = id; render(); return; }
+  if (id === s.giorno) { vai('giorno'); return; }
+  const fatti = s.esercizi.filter(e => e.stato === 'fatto').length;
+  const nuovo = giornoScheda(id);
+  const ok = await conferma({
+    titolo: `Passare al ${nuovo.nome}?`,
+    testo: `Il ${s.nomeGiorno} in corso verrà annullato senza salvarlo${fatti ? ` (anche ${fatti === 1 ? 'l\'esercizio già registrato' : `i ${fatti} esercizi già registrati`})` : ''}: non conterà né come fatto né nei progressi. Le tue note sugli esercizi restano.`,
+    ok: `Inizia ${nuovo.nome}`, annulla: `Resta sul ${s.nomeGiorno}`, pericolo: fatti > 0
+  });
+  if (!ok) return;
+  S.stato.sessioneInCorso = null;
+  A.iniziaGiorno(el);
+};
+A.iniziaGiorno = el => {
+  const g = giornoScheda(el.dataset.id);
+  S.stato.sessioneInCorso = {
+    id: rid(), giorno: g.id, nomeGiorno: g.nome, settimana: S.stato.settimana, inizio: new Date().toISOString(),
+    esercizi: g.esercizi.map(daScheda), corrente: null, timer: null
+  };
+  salva();
+  vai('giorno');
+};
+function daScheda(e) {
+  const p = pianoSett(e);
+  return {
+    uid: rid(), nome: e.nome, categoria: e.categoria, tipoCarico: e.tipoCarico, perLato: !!e.perLato,
+    serie: p.serie, ripetizioni: p.ripetizioni, notaSett: p.nota || '', rir: e.rir, tempo: e.tempo, recuperoSec: e.recuperoSec,
+    note: e.note, videoUrl: e.videoUrl, stato: 'da_fare', serieFatte: 0, durata: e.recuperoSec || 90,
+    bozza: null, risultato: null, nomeOriginale: null, aggiunto: false
+  };
+}
+A.settAvanti = async () => {
+  const st = S.stato, n = st.scheda.settimane;
+  const mancano = st.scheda.giorni.filter(g => !st.completati.includes(g.id)).map(g => g.id);
+  const dest = st.settimana >= n ? 1 : st.settimana + 1;
+  if (mancano.length) {
+    const ok = await conferma({ titolo: `Passare alla settimana ${dest}?`, testo: `Questa settimana non hai ancora completato: ${mancano.join(', ')}.`, ok: `Passa alla settimana ${dest}` });
+    if (!ok) return;
+  }
+  st.precedente = { settimana: st.settimana, completati: st.completati, ultimoGiorno: st.ultimoGiorno };
+  st.settimana = dest; st.completati = []; S.giornoScelto = null;
+  salva(); render(); toast(`Settimana ${dest} di ${n}`);
+};
+A.settIndietro = () => {
+  const st = S.stato;
+  const prec = st.precedente;
+  const dest = st.settimana > 1 ? st.settimana - 1 : prec?.settimana;
+  if (!dest) return;
+  if (prec && prec.settimana === dest) { st.completati = prec.completati || []; }
+  else st.completati = [];
+  st.precedente = null; st.settimana = dest; S.giornoScelto = null;
+  salva(); render(); toast(`Tornato alla settimana ${dest}`);
+};
+
+// =====================================================================
+//  RISCALDAMENTO
+// =====================================================================
+VISTE.riscaldamento = () => {
+  const r = S.stato.scheda.riscaldamento;
+  const corpo = r.length ? r.map(sz => `<h2 class="grp">${esc(sz.sezione)}</h2>` + sz.esercizi.map(e => `
+    <div class="ex">${miniatura(e.videoUrl)}
+      <div class="body"><span class="n">${esc(e.nome)}</span>${e.prescrizione ? `<span class="m">${esc(e.prescrizione)}</span>` : ''}
+      ${e.videoUrl ? `<a class="vlink" href="${esc(e.videoUrl)}" target="_blank" rel="noopener">Guarda il video${ico('ext', 14)}</a>` : ''}</div>
+    </div>`).join('')).join('') : '<div class="empty">Nessun esercizio di riscaldamento nella scheda.</div>';
+  return `<div class="scr" style="gap:14px"><div class="head" style="margin-bottom:4px"><h1 class="big">Riscaldamento</h1><span class="date">Da fare prima di iniziare l'allenamento</span></div>${corpo}</div>`;
+};
+
+// =====================================================================
+//  ALLENAMENTO DEL GIORNO
+// =====================================================================
+function correnteUid() {
+  const s = sess();
+  const c = s.esercizi.find(e => e.uid === s.corrente && e.stato === 'da_fare');
+  return (c || s.esercizi.find(e => e.stato === 'da_fare'))?.uid || null;
+}
+function metaEs(e) {
+  return [`${e.serie} × ${e.ripetizioni}${e.perLato ? ' per lato' : ''}`, e.rir ? `RIR ${e.rir}` : '', e.recuperoSec ? `Rec. ${fmtRec(e.recuperoSec)}` : '', e.tempo ? `Tempo ${e.tempo}` : ''].filter(Boolean).join(' · ');
+}
+function pesoTesto(e, r) {
+  if (e.tipoCarico === 'corpo_libero') return 'corpo libero';
+  if (r.peso == null) return '';
+  return (e.tipoCarico === 'elastico' ? 'elastico ' : '') + fmtN(r.peso) + ' kg';
+}
+VISTE.giorno = () => {
+  const s = sess(), list = s.esercizi, tot = list.length;
+  const fatti = list.filter(e => e.stato === 'fatto').length;
+  const cur = correnteUid();
+  let cat = null, h = '';
+  list.forEach(e => {
+    if (e.categoria !== cat) { cat = e.categoria; h += `<h2 class="grp">${esc(cat)}</h2>`; }
+    const isCur = e.uid === cur, done = e.stato === 'fatto', skip = e.stato === 'saltato';
+    const chips = [];
+    if (done) { const pt = pesoTesto(e, e.risultato); chips.push(`<span class="chip ok">${ico('check', 13, 3)}Fatto${pt ? ' · ' + esc(pt) : ''}</span>`); }
+    else if (skip) chips.push('<span class="chip">Saltato</span>');
+    else if (isCur) chips.push('<span class="chip acc">In corso</span>');
+    if (e.notaSett) chips.push(`<span class="chip acc">${esc(cap(e.notaSett))}</span>`);
+    if (e.tipoCarico !== 'kg') chips.push(`<span class="chip">${TIPI[e.tipoCarico]}</span>`);
+    if (e.aggiunto) chips.push('<span class="chip">Aggiunto oggi</span>');
+    if (e.nomeOriginale) chips.push(`<span class="chip">Al posto di ${esc(e.nomeOriginale)}</span>`);
+    const mia = S.note[norm(e.nome)]?.testo;
+    h += `<div class="ex${isCur ? ' cur' : ''}${done ? ' done' : ''}${skip ? ' skip' : ''}">
+      ${miniatura(e.videoUrl)}
+      <button class="body" data-a="apriEs" data-u="${e.uid}">
+        <span class="n">${esc(e.nome)}</span><span class="m">${esc(metaEs(e))}</span>
+        ${e.note ? `<span class="tn">${esc(e.note)}</span>` : ''}
+        ${mia ? `<span class="tn"><b>Mia nota:</b> ${esc(mia)}</span>` : ''}
+        ${chips.length ? `<span class="chips">${chips.join('')}</span>` : ''}
+      </button>
+      ${!done && !isCur ? `<button class="iconbtn plain" aria-label="Modifica per oggi" data-a="modOggi" data-u="${e.uid}">${ico('pencil', 20)}</button>` : ''}
+    </div>`;
+  });
+  const finito = !list.some(e => e.stato === 'da_fare');
+  return `<div class="scr sub">
+    <div class="topbar">
+      <a class="iconbtn" href="#home" aria-label="Indietro">${ico('chevL')}</a>
+      <div class="tt"><h1>${esc(s.nomeGiorno)}</h1><span class="sub">Settimana ${s.settimana} · ${tot} esercizi</span></div>
+      <span class="num" style="font-size:22px">${fatti}<span style="color:var(--mut)">/${tot}</span></span>
+    </div>
+    <div class="progress"><div style="width:${tot ? Math.round(fatti / tot * 100) : 0}%"></div></div>
+    ${h || '<div class="empty">Nessun esercizio per oggi.</div>'}
+    <button class="btn-dash" data-a="modOggi">${ico('plus', 18, 2.5)}Aggiungi esercizio per oggi</button>
+    ${finito && tot ? '<div class="ok-box">Hai registrato tutti gli esercizi. Premi «Fine allenamento» per salvare.</div>' : ''}
+    <button class="btn-dark" style="margin-top:6px" data-a="fineAllenamento">Fine allenamento</button>
+    <button class="btn-txt" data-a="annullaAllenamento">Annulla allenamento senza salvare</button>
+  </div>`;
+};
+A.apriEs = el => vai('esercizio/' + el.dataset.u);
+A.annullaAllenamento = async () => {
+  const ok = await conferma({ titolo: 'Annullare l\'allenamento?', testo: 'L\'allenamento in corso verrà eliminato senza salvare i dati inseriti. Le tue note sugli esercizi restano.', ok: 'Annulla allenamento', annulla: 'No, continua', pericolo: true });
+  if (!ok) return;
+  S.stato.sessioneInCorso = null;
+  await scriviStato();
+  vai('home'); toast('Allenamento annullato');
+};
+A.fineAllenamento = async () => {
+  const s = sess();
+  const fatti = s.esercizi.filter(e => e.stato === 'fatto');
+  const nonFatti = s.esercizi.filter(e => e.stato !== 'fatto');
+  if (!fatti.length) {
+    if (!await conferma({ titolo: 'Nessun esercizio registrato', testo: 'Non hai registrato nessun esercizio. Vuoi chiudere comunque l\'allenamento e segnare il giorno come completato?', ok: 'Chiudi allenamento' })) return;
+  } else if (nonFatti.length) {
+    if (!await conferma({ titolo: 'Fine allenamento', testo: `${nonFatti.length === 1 ? '1 esercizio non registrato verrà salvato' : nonFatti.length + ' esercizi non registrati verranno salvati'} come ${nonFatti.length === 1 ? 'saltato' : 'saltati'}:${nonFatti.map(e => e.nome).join(', ')}.`, ok: 'Salva allenamento' })) return;
+  }
+  const rec = {
+    id: s.id, data: new Date().toISOString(), inizio: s.inizio, giorno: s.giorno, nomeGiorno: s.nomeGiorno, settimana: s.settimana,
+    scheda: S.stato.scheda.nome,
+    esercizi: fatti.map(e => ({
+      nome: e.nome, nomeOriginale: e.nomeOriginale || null, categoria: e.categoria, tipoCarico: e.tipoCarico, perLato: !!e.perLato,
+      previsto: { serie: e.serie, ripetizioni: e.ripetizioni, rir: e.rir || '' },
+      peso: e.tipoCarico === 'corpo_libero' ? null : e.risultato.peso, serie: e.risultato.serie, ripetizioni: e.risultato.ripetizioni,
+      rirPercepito: e.risultato.rir
+    })),
+    saltati: nonFatti.map(e => e.nome)
+  };
+  try { await S.archivio.salvaSessione(rec); }
+  catch (e) { console.error(e); toast('Non riesco a salvare: controlla la connessione e riprova'); return; }
+  S.sessioni.push(rec);
+  S.stato.ultimoGiorno = s.giorno;
+  if (!S.stato.completati.includes(s.giorno)) S.stato.completati.push(s.giorno);
+  S.stato.sessioneInCorso = null; S.giornoScelto = null;
+  await scriviStato();
+  vai('home'); toast('Allenamento salvato');
+};
+
+// ---------- modifica solo per oggi ----------
+function campiEsercizioOggi(e, nuovo) {
+  const cats = [...new Set([...CATEGORIE, ...S.stato.scheda.giorni.flatMap(g => g.esercizi.map(x => x.categoria))])];
+  return `
+    <div class="fld"><label for="o-nome">Nome esercizio</label><input class="inp" id="o-nome" value="${esc(e.nome)}" autocomplete="off">
+      ${nuovo ? '' : '<span class="hint" style="font-size:12px">Cambia il nome per sostituire l\'esercizio: i dati andranno sotto il nuovo nome.</span>'}</div>
+    <div class="grid3">
+      <div class="fld"><label for="o-serie">Serie</label><input class="inp" id="o-serie" inputmode="numeric" value="${e.serie}"></div>
+      <div class="fld"><label for="o-rip">Ripetizioni</label><input class="inp" id="o-rip" inputmode="numeric" value="${e.ripetizioni}"></div>
+      <div class="fld"><label for="o-rir">RIR target</label><input class="inp" id="o-rir" value="${esc(e.rir)}"></div>
+    </div>
+    <div class="grid2">
+      <div class="fld"><label for="o-rec">Recupero (secondi)</label><input class="inp" id="o-rec" inputmode="numeric" value="${e.recuperoSec || 0}"></div>
+      <div class="fld"><label for="o-tipo">Carico</label><select class="inp" id="o-tipo">${Object.entries(TIPI).map(([k, v]) => `<option value="${k}"${e.tipoCarico === k ? ' selected' : ''}>${v}</option>`).join('')}</select></div>
+    </div>
+    ${nuovo ? `<div class="fld"><label for="o-cat">Categoria</label><select class="inp" id="o-cat">${cats.map(c => `<option${c === e.categoria ? ' selected' : ''}>${esc(c)}</option>`).join('')}</select></div>` : ''}
+    <div class="fld"><label for="o-video">Link video YouTube${nuovo ? ' (facoltativo)' : ''}</label><input class="inp" id="o-video" inputmode="url" value="${esc(e.videoUrl || '')}" placeholder="https://www.youtube.com/watch?v=…"></div>
+    <label class="check"><input type="checkbox" id="o-lato"${e.perLato ? ' checked' : ''}>Ripetizioni per lato</label>
+    <div class="fld"><label for="o-note">Note del trainer</label><textarea class="inp" id="o-note" rows="2">${esc(e.note)}</textarea></div>
+    <div id="o-err"></div>`;
+}
+A.modOggi = el => {
+  const uid = el.dataset.u;
+  const nuovo = !uid;
+  const e = nuovo ? { nome: '', categoria: 'Monoarticolari', tipoCarico: 'kg', perLato: false, serie: 3, ripetizioni: 10, rir: '', tempo: '', recuperoSec: 60, note: '', videoUrl: '' } : esDaUid(uid);
+  if (!e) return;
+  const salto = e.stato === 'saltato';
+  apriFoglio(`<h2>${nuovo ? 'Aggiungi esercizio per oggi' : 'Modifica per oggi'}</h2>
+    <p class="hint">Vale solo per questo allenamento: la scheda non cambia.</p>
+    ${campiEsercizioOggi(e, nuovo)}
+    <button class="btn-pri" data-a="salvaOggi" data-u="${uid || ''}">${nuovo ? 'Aggiungi all\'allenamento' : 'Salva per oggi'}</button>
+    ${nuovo ? '' : `<div class="grid2">
+        <button class="btn-sec" data-a="spostaOggi" data-u="${uid}" data-d="-1">${ico('up', 18)}Sposta su</button>
+        <button class="btn-sec" data-a="spostaOggi" data-u="${uid}" data-d="1">${ico('down', 18)}Sposta giù</button>
+      </div>
+      <div class="grid2">
+        <button class="btn-sec" data-a="saltaOggi" data-u="${uid}">${salto ? 'Rimetti in lista' : 'Salta oggi'}</button>
+        <button class="btn-danger" data-a="eliminaOggi" data-u="${uid}">${ico('trash', 18)}Elimina oggi</button>
+      </div>`}
+    <button class="btn-txt" data-a="chiudiFoglio">Annulla</button>`);
+};
+A.salvaOggi = el => {
+  const uid = el.dataset.u, s = sess();
+  const nome = str($('#o-nome').value).replace(/\s+/g, ' ');
+  const serie = Number($('#o-serie').value), rip = Number($('#o-rip').value), rec = Number($('#o-rec').value || 0);
+  const errori = [];
+  if (!nome) errori.push('Scrivi il nome dell\'esercizio.');
+  if (!Number.isInteger(serie) || serie < 1) errori.push('Le serie devono essere un numero intero maggiore di 0.');
+  if (!Number.isInteger(rip) || rip < 1) errori.push('Le ripetizioni devono essere un numero intero maggiore di 0.');
+  if (!Number.isInteger(rec) || rec < 0) errori.push('Il recupero va indicato in secondi (es. 90).');
+  if (errori.length) { $('#o-err').innerHTML = erroriHtml(errori); return; }
+  const dati = { serie, ripetizioni: rip, recuperoSec: rec, rir: str($('#o-rir').value), tipoCarico: $('#o-tipo').value, perLato: $('#o-lato').checked, note: str($('#o-note').value), videoUrl: str($('#o-video').value) };
+  if (!uid) {
+    const e = { ...daScheda({ nome, categoria: $('#o-cat').value, tipoCarico: dati.tipoCarico, perLato: dati.perLato, settimane: [{ serie, ripetizioni: rip }], rir: dati.rir, tempo: '', recuperoSec: rec, note: dati.note, videoUrl: dati.videoUrl }), aggiunto: true };
+    s.esercizi.push(e);
+    toast('Esercizio aggiunto per oggi');
+  } else {
+    const e = esDaUid(uid);
+    if (norm(nome) !== norm(e.nome) && !e.aggiunto) {
+      const orig = e.nomeOriginale || e.nome;
+      e.nomeOriginale = norm(orig) === norm(nome) ? null : orig;
+    }
+    Object.assign(e, dati, { nome });
+    e.durata = rec || e.durata || 90;
+    e.serieFatte = Math.min(e.serieFatte, serie);
+    toast('Modificato solo per oggi');
+  }
+  salva(); chiudiFoglio(); render();
+};
+A.spostaOggi = el => {
+  const s = sess(), i = s.esercizi.findIndex(e => e.uid === el.dataset.u), j = i + Number(el.dataset.d);
+  if (i < 0 || j < 0 || j >= s.esercizi.length) { toast('Non si può spostare oltre'); return; }
+  [s.esercizi[i], s.esercizi[j]] = [s.esercizi[j], s.esercizi[i]];
+  salva(); render();
+  A.modOggi(el);
+};
+A.saltaOggi = el => {
+  const e = esDaUid(el.dataset.u);
+  e.stato = e.stato === 'saltato' ? 'da_fare' : 'saltato';
+  salva(); chiudiFoglio();
+  if (e.stato === 'saltato' && rotta().nome === 'esercizio') return vaiAlProssimo(e, 'Esercizio saltato');
+  render(); toast(e.stato === 'saltato' ? 'Esercizio saltato' : 'Rimesso in lista');
+};
+A.eliminaOggi = async el => {
+  const uid = el.dataset.u, e = esDaUid(uid);
+  if (!await conferma({ titolo: 'Eliminare per oggi?', testo: `«${e.nome}» verrà tolto solo dall'allenamento di oggi. La scheda non cambia.`, ok: 'Elimina per oggi', pericolo: true })) return;
+  const s = sess();
+  s.esercizi = s.esercizi.filter(x => x.uid !== uid);
+  salva();
+  if (rotta().nome === 'esercizio') vai('giorno'); else render();
+  toast('Esercizio tolto per oggi');
+};
+
+// =====================================================================
+//  ESERCIZIO IN CORSO
+// =====================================================================
+VISTE.esercizio = uid => {
+  const s = sess(), i = s.esercizi.findIndex(e => e.uid === uid), e = s.esercizi[i];
+  if (e.stato === 'da_fare' && s.corrente !== uid) { s.corrente = uid; salva(); }
+  const id = ytId(e.videoUrl);
+  const video = e.videoUrl
+    ? `<a class="video" href="${esc(e.videoUrl)}" target="_blank" rel="noopener" aria-label="Apri il video su YouTube">${id ? `<img src="https://img.youtube.com/vi/${id}/hqdefault.jpg" alt="" onerror="this.remove()">` : ''}<span class="pl">${play(26, '#17191E')}</span></a>
+       <a class="vlink-big" href="${esc(e.videoUrl)}" target="_blank" rel="noopener">Guarda il video su YouTube${ico('ext', 16)}</a>`
+    : '';
+  const chips = [];
+  if (e.notaSett) chips.push(`<span class="chip acc">Settimana di ${esc(e.notaSett)}</span>`);
+  if (e.stato === 'fatto') chips.push(`<span class="chip ok">${ico('check', 13, 3)}Già registrato</span>`);
+  if (e.stato === 'saltato') chips.push('<span class="chip">Saltato oggi</span>');
+  if (e.nomeOriginale) chips.push(`<span class="chip">Al posto di ${esc(e.nomeOriginale)}</span>`);
+  if (e.aggiunto) chips.push('<span class="chip">Aggiunto oggi</span>');
+  const nota = S.note[norm(e.nome)]?.testo || '';
+  return `<div class="scr sub">
+    <div class="topbar">
+      <a class="iconbtn" href="#giorno" aria-label="Torna a ${esc(s.nomeGiorno)}">${ico('chevL')}</a>
+      <span class="lbl-top">${esc(s.nomeGiorno)} · Esercizio ${i + 1} di ${s.esercizi.length}</span>
+      <button class="pill-btn" data-a="modOggi" data-u="${e.uid}">${ico('pencil', 16)}Modifica per oggi</button>
+    </div>
+    <h1 style="margin:0;font-size:24px;font-weight:800;line-height:1.2">${esc(e.nome)}</h1>
+    ${chips.length ? `<div class="chips" style="margin-top:-6px">${chips.join('')}</div>` : ''}
+    ${video}
+    <div class="stats">
+      <div class="stat"><span class="k">Serie × rip.</span><span class="v">${e.serie} × ${e.ripetizioni}</span>${e.perLato ? '<span class="x">per lato</span>' : ''}</div>
+      <div class="stat"><span class="k">RIR target</span><span class="v">${esc(e.rir || '—')}</span></div>
+      <div class="stat"><span class="k">Recupero</span><span class="v">${e.recuperoSec ? fmtRec(e.recuperoSec) : '—'}</span></div>
+    </div>
+    ${e.tempo ? `<div class="card sm" style="flex-direction:row;justify-content:space-between;align-items:center"><span class="k-up">Tempo di esecuzione</span><span class="num" style="font-size:22px">${esc(e.tempo)}</span></div>` : ''}
+    ${e.note ? `<div class="card sm"><span class="k-up">Nota del trainer</span><span style="font-size:14px;line-height:1.45">${esc(e.note)}</span></div>` : ''}
+    ${timerHtml(e)}
+    <div class="fld" style="gap:6px">
+      <label for="nota-personale" class="k-up" style="font-size:12px;font-weight:800">Le mie note</label>
+      <textarea class="inp" id="nota-personale" rows="2" data-in="nota" data-u="${e.uid}" placeholder="Es. sedile in posizione 4, fastidio alla spalla…" style="resize:none;border-color:var(--line);border-radius:14px">${esc(nota)}</textarea>
+      <span class="saved" id="nota-stato">${nota ? 'Salvata: la ritrovi le prossime volte' : ''}</span>
+    </div>
+    ${formCompletato(e)}
+  </div>`;
+};
+function valoriForm(e) {
+  const r = e.bozza || (e.risultato ? { peso: e.risultato.peso == null ? '' : String(e.risultato.peso).replace('.', ','), serie: e.risultato.serie, ripetizioni: e.risultato.ripetizioni, rir: e.risultato.rir } : null);
+  return r || { peso: '', serie: e.serie, ripetizioni: e.ripetizioni, rir: null };
+}
+function formCompletato(e) {
+  const v = valoriForm(e);
+  const campoPeso = e.tipoCarico === 'corpo_libero'
+    ? `<div class="fld"><span class="lbl">Carico</span><div class="static">Corpo libero</div></div>`
+    : `<div class="fld"><label for="f-peso">${e.tipoCarico === 'elastico' ? 'Elastico (kg)' : 'Peso (kg)'}</label><input class="inp big" id="f-peso" inputmode="decimal" placeholder="0" value="${esc(v.peso)}" data-in="bozza" data-u="${e.uid}" autocomplete="off"></div>`;
+  const rir = [0, 1, 2, 3, 4].map(n => `<button aria-pressed="${v.rir === n}" data-a="rir" data-u="${e.uid}" data-v="${n}">${n === 4 ? '4+' : n}</button>`).join('');
+  const fatto = e.stato === 'fatto';
+  return `<div class="card" style="padding:16px">
+    <h2 style="margin:0;font-size:17px;font-weight:800">Esercizio completato</h2>
+    <div class="grid3">
+      ${campoPeso}
+      <div class="fld"><label for="f-serie">Serie</label><input class="inp big" id="f-serie" inputmode="numeric" value="${esc(v.serie)}" data-in="bozza" data-u="${e.uid}" autocomplete="off"></div>
+      <div class="fld"><label for="f-rip">Ripetizioni</label><input class="inp big" id="f-rip" inputmode="numeric" value="${esc(v.ripetizioni)}" data-in="bozza" data-u="${e.uid}" autocomplete="off"></div>
+    </div>
+    <div class="fld" style="gap:6px"><span class="lbl">RIR percepito</span><div class="rir" role="group" aria-label="RIR percepito">${rir}</div></div>
+    <div id="f-err"></div>
+    <button class="btn-pri" data-a="salvaEs" data-u="${e.uid}">${fatto ? 'Aggiorna i dati' : 'Salva e vai al prossimo'}</button>
+    ${e.stato === 'da_fare' ? `<button class="btn-txt" style="text-decoration:none;font-size:14px;font-weight:700" data-a="saltaOggi" data-u="${e.uid}">Salta esercizio</button>` : ''}
+    ${e.stato === 'saltato' ? `<button class="btn-txt" style="text-decoration:none;font-size:14px;font-weight:700" data-a="saltaOggi" data-u="${e.uid}">Rimetti in lista</button>` : ''}
+  </div>`;
+}
+function leggiBozza(e) {
+  return { peso: $('#f-peso') ? $('#f-peso').value : '', serie: $('#f-serie').value, ripetizioni: $('#f-rip').value, rir: e.bozza?.rir ?? valoriForm(e).rir ?? null };
+}
+IN.bozza = el => { const e = esDaUid(el.dataset.u); e.bozza = leggiBozza(e); salva(); };
+A.rir = el => {
+  const e = esDaUid(el.dataset.u), v = Number(el.dataset.v);
+  const b = leggiBozza(e);
+  b.rir = b.rir === v ? null : v;
+  e.bozza = b; salva();
+  document.querySelectorAll('.rir button').forEach(x => x.setAttribute('aria-pressed', String(Number(x.dataset.v) === b.rir)));
+};
+A.salvaEs = el => {
+  const e = esDaUid(el.dataset.u), b = leggiBozza(e), err = [];
+  let peso = null;
+  if (e.tipoCarico !== 'corpo_libero') {
+    peso = parseNum(b.peso);
+    if (peso == null || peso < 0) err.push(e.tipoCarico === 'elastico' ? 'Inserisci i kg dell\'elastico (es. 10).' : 'Inserisci il peso in kg (es. 62,5).');
+  }
+  const serie = Number(b.serie), rip = Number(b.ripetizioni);
+  if (!Number.isInteger(serie) || serie < 1) err.push('Le serie fatte devono essere un numero intero maggiore di 0.');
+  if (!Number.isInteger(rip) || rip < 0) err.push('Le ripetizioni fatte devono essere un numero intero.');
+  if (err.length) { $('#f-err').innerHTML = erroriHtml(err); $('#f-err').scrollIntoView({ block: 'center', behavior: 'smooth' }); return; }
+  const giaFatto = e.stato === 'fatto';
+  e.risultato = { peso, serie, ripetizioni: rip, rir: b.rir ?? null };
+  e.stato = 'fatto'; e.bozza = null;
+  salva();
+  if (giaFatto) { vai('giorno'); toast('Dati aggiornati'); return; }
+  vaiAlProssimo(e, 'Salvato');
+};
+function vaiAlProssimo(e, msg) {
+  const s = sess(), i = s.esercizi.indexOf(e);
+  if (s.timer && s.timer.fine <= Date.now()) s.timer = null;
+  const next = s.esercizi.slice(i + 1).find(x => x.stato === 'da_fare') || s.esercizi.find(x => x.stato === 'da_fare');
+  if (next) { s.corrente = next.uid; salva(); vai('esercizio/' + next.uid); toast(`${msg}. Ora: ${next.nome}`); }
+  else { vai('giorno'); toast('Esercizi finiti: premi «Fine allenamento»'); }
+}
+
+// ---------- note personali ----------
+let notaT = null;
+IN.nota = el => {
+  const e = esDaUid(el.dataset.u), k = norm(e.nome), testo = el.value;
+  if (testo.trim()) S.note[k] = { nome: e.nome, testo, aggiornato: new Date().toISOString() };
+  else delete S.note[k];
+  $('#nota-stato').textContent = 'Salvataggio…';
+  clearTimeout(notaT);
+  notaT = setTimeout(async () => {
+    try { await S.archivio.salvaNota(k, S.note[k] || null); const st = $('#nota-stato'); if (st) st.textContent = testo.trim() ? 'Salvata: la ritrovi le prossime volte' : 'Nota cancellata'; }
+    catch (err) { console.error(err); const st = $('#nota-stato'); if (st) st.textContent = 'Non salvata: controlla la connessione'; }
+  }, 700);
+};
+
+// ---------- timer di recupero ----------
+function statoTimer(e) {
+  const t = sess().timer;
+  if (!t) return { modo: 'fermo', rest: e.durata, durata: e.durata };
+  const rest = Math.max(0, Math.ceil((t.fine - Date.now()) / 1000));
+  return { modo: rest > 0 ? 'va' : 'fine', rest, durata: t.durata };
+}
+function timerHtml(e) {
+  const { modo, rest, durata } = statoTimer(e);
+  const tot = e.serie, fatte = e.serieFatte, tutte = fatte >= tot;
+  const titolo = tutte ? `Serie fatte: ${tot} di ${tot}` : `Serie ${fatte + 1} di ${tot}`;
+  const dots = tot <= 12 ? `<span class="dots" aria-hidden="true">${Array.from({ length: tot }, (_, i) => `<i class="${i < fatte ? 'f' : i === fatte ? 'c' : ''}"></i>`).join('')}</span>` : '';
+  const sub = modo === 'fermo' ? 'recupero · tocca il tempo per cambiarlo' : modo === 'va' ? `recupero · impostato ${mmss(durata)}` : 'Recupero finito!';
+  const larg = modo === 'fermo' ? 100 : modo === 'va' ? Math.round(rest / Math.max(1, durata) * 100) : 100;
+  const numero = modo === 'fermo'
+    ? `<button class="tnum" data-a="tImposta" data-u="${e.uid}" aria-label="Imposta il recupero, ora ${mmss(rest)}">${mmss(rest)}</button>`
+    : `<span class="tnum" role="timer">${mmss(rest)}</span>`;
+  return `<div class="timer${modo === 'fine' ? ' end' : ''}" id="timer" data-u="${e.uid}" data-modo="${modo}">
+    <div class="between">
+      <span style="font-size:15px;font-weight:800">${titolo}</span>
+      <span style="display:flex;align-items:center;gap:8px">${fatte > 0 ? `<button class="undo" data-a="serieMeno" data-u="${e.uid}">Annulla serie</button>` : ''}${dots}</span>
+    </div>
+    <div class="between">
+      <button class="tbtn" aria-label="Togli 15 secondi" data-a="tDelta" data-u="${e.uid}" data-d="-15">−15</button>
+      <div class="tmid">${numero}<span class="tsub">${sub}</span></div>
+      <button class="tbtn" aria-label="Aggiungi 15 secondi" data-a="tDelta" data-u="${e.uid}" data-d="15">+15</button>
+    </div>
+    <div class="tbar"><div style="width:${larg}%"></div></div>
+    <div class="grid2">
+      ${modo === 'fermo' ? `<button class="tg1" data-a="tAvvia" data-u="${e.uid}">Avvia recupero</button>` : `<button class="tg1" data-a="tStop">${modo === 'va' ? 'Ferma timer' : 'Chiudi'}</button>`}
+      <button class="tg2" data-a="serieFatta" data-u="${e.uid}" ${tutte ? 'disabled' : ''}>${tutte ? 'Serie finite' : 'Serie fatta'}</button>
+    </div>
+  </div>`;
+}
+function ridisegnaTimer() { const el = $('#timer'); if (!el) return; const e = esDaUid(el.dataset.u); if (e) el.outerHTML = timerHtml(e); }
+function avviaTimer(e) { sess().timer = { fine: Date.now() + e.durata * 1000, durata: e.durata }; salva(); ridisegnaTimer(); }
+A.tAvvia = el => avviaTimer(esDaUid(el.dataset.u));
+A.tStop = () => { sess().timer = null; salva(); ridisegnaTimer(); };
+A.serieFatta = el => { const e = esDaUid(el.dataset.u); if (e.serieFatte < e.serie) e.serieFatte++; avviaTimer(e); };
+A.serieMeno = el => { const e = esDaUid(el.dataset.u); if (e.serieFatte > 0) e.serieFatte--; salva(); ridisegnaTimer(); };
+A.tDelta = el => {
+  const e = esDaUid(el.dataset.u), d = Number(el.dataset.d), s = sess();
+  const { modo, rest } = statoTimer(e);
+  if (modo === 'va') {
+    const nuovo = Math.max(1, rest + d);
+    s.timer.fine = Date.now() + nuovo * 1000;
+    s.timer.durata = Math.max(s.timer.durata, nuovo);
+  } else {
+    e.durata = Math.min(3600, Math.max(5, e.durata + d));
+    s.timer = null;
+  }
+  salva(); ridisegnaTimer();
+};
+A.tImposta = el => {
+  const e = esDaUid(el.dataset.u);
+  apriFoglio(`<h2>Durata del recupero</h2>
+    <div class="grid2">
+      <div class="fld"><label for="t-min">Minuti</label><input class="inp big" id="t-min" inputmode="numeric" value="${Math.floor(e.durata / 60)}"></div>
+      <div class="fld"><label for="t-sec">Secondi</label><input class="inp big" id="t-sec" inputmode="numeric" value="${e.durata % 60}"></div>
+    </div>
+    <button class="btn-pri" data-a="tImpostaOk" data-u="${e.uid}">Imposta</button>
+    <button class="btn-txt" data-a="chiudiFoglio">Annulla</button>`);
+};
+A.tImpostaOk = el => {
+  const e = esDaUid(el.dataset.u);
+  const tot = (parseInt($('#t-min').value, 10) || 0) * 60 + (parseInt($('#t-sec').value, 10) || 0);
+  e.durata = Math.min(3600, Math.max(5, tot));
+  sess().timer = null;
+  salva(); chiudiFoglio(); ridisegnaTimer();
+};
+setInterval(() => {
+  const s = S.stato?.sessioneInCorso;
+  const el = $('#timer');
+  if (!s || !el) return;
+  const e = esDaUid(el.dataset.u);
+  if (!e) return;
+  const { modo, rest, durata } = statoTimer(e);
+  if (el.dataset.modo !== modo) { ridisegnaTimer(); return; }
+  if (modo !== 'va') return;
+  el.querySelector('.tnum').textContent = mmss(rest);
+  el.querySelector('.tbar div').style.width = Math.round(rest / Math.max(1, durata) * 100) + '%';
+}, 250);
+
+// =====================================================================
+//  PROGRESSI
+// =====================================================================
+function periodoCorrente() {
+  const { periodo, offset } = S.prog, ora = new Date();
+  let a, b, etichetta, inizio;
+  if (periodo === 'settimana') {
+    const d = new Date(ora.getFullYear(), ora.getMonth(), ora.getDate());
+    a = new Date(d); a.setDate(d.getDate() - (d.getDay() + 6) % 7 + 7 * offset);
+    b = new Date(a); b.setDate(a.getDate() + 7);
+    const ult = new Date(b); ult.setDate(b.getDate() - 1);
+    etichetta = `${dataBreve(a)} – ${dataBreve(ult)} ${ult.getFullYear()}`; inizio = 'Inizio sett.';
+  } else if (periodo === 'mese') {
+    a = new Date(ora.getFullYear(), ora.getMonth() + offset, 1); b = new Date(a.getFullYear(), a.getMonth() + 1, 1);
+    etichetta = cap(a.toLocaleDateString('it-IT', { month: 'long', year: 'numeric' })); inizio = 'Inizio mese';
+  } else {
+    a = new Date(ora.getFullYear() + offset, 0, 1); b = new Date(a.getFullYear() + 1, 0, 1);
+    etichetta = String(a.getFullYear()); inizio = 'Inizio anno';
+  }
+  return { a, b, etichetta, inizio };
+}
+function registrazioni() {
+  const out = [];
+  for (const s of S.sessioni) {
+    const d = new Date(s.data);
+    for (const e of s.esercizi || []) out.push({ sid: s.id, data: d, key: norm(e.nome), nome: e.nome, tipo: e.tipoCarico, peso: e.peso, serie: e.serie, rip: e.ripetizioni, rir: e.rirPercepito, rirT: e.previsto?.rir || '' });
+  }
+  return out.sort((x, y) => x.data - y.data);
+}
+function unaPerSessione(lista) { const m = new Map(); lista.forEach(r => m.set(r.sid, r)); return [...m.values()]; }
+function lunedi(d) { const x = new Date(d.getFullYear(), d.getMonth(), d.getDate()); x.setDate(x.getDate() - (x.getDay() + 6) % 7); return x; }
+let PG = null;
+VISTE.progressi = () => {
+  const R = registrazioni();
+  const per = periodoCorrente();
+  const inP = R.filter(r => r.data >= per.a && r.data < per.b);
+  const nomi = new Map(); R.forEach(r => nomi.set(r.key, r.nome));
+  if (!S.prog.es || !nomi.has(S.prog.es)) S.prog.es = (inP.at(-1) || R.at(-1))?.key || null;
+  const es = S.prog.es;
+  const gran = S.prog.gran || { settimana: 'allenamento', mese: 'settimana', anno: 'mese' }[S.prog.periodo];
+
+  // peso / ripetizioni
+  const recEs = R.filter(r => r.key === es);
+  const tipo = recEs.at(-1)?.tipo || 'kg';
+  const unita = tipo === 'corpo_libero' ? 'rip' : 'kg';
+  const pesoPts = unaPerSessione(inP.filter(r => r.key === es)).map(r => ({ x: dataBreve(r.data), y: tipo === 'corpo_libero' ? r.rip : r.peso })).filter(p => p.y != null);
+  const primo = pesoPts[0]?.y, ultimo = pesoPts.at(-1)?.y;
+  const varz = pesoPts.length > 1 ? ultimo - primo : null;
+
+  // volume
+  const recVol = inP.filter(r => r.tipo === 'kg' && r.peso > 0);
+  const gruppi = new Map();
+  recVol.forEach(r => {
+    let k, lab;
+    if (gran === 'allenamento') { k = r.sid; lab = dataBreve(r.data); }
+    else if (gran === 'settimana') { const l = lunedi(r.data); k = l.getTime(); lab = dataBreve(l); }
+    else { k = r.data.getFullYear() * 12 + r.data.getMonth(); lab = cap(r.data.toLocaleDateString('it-IT', { month: 'short' }).replace('.', '')); }
+    const g = gruppi.get(k) || { lab, v: 0 };
+    g.v += r.peso * r.rip * r.serie; gruppi.set(k, g);
+  });
+  const vol = [...gruppi.values()];
+  if (gran === 'settimana' && S.prog.periodo === 'mese') vol.forEach((g, i) => g.lab = `Sett. ${i + 1}`);
+  const volTot = vol.reduce((t, g) => t + g.v, 0);
+
+  // RIR
+  const rirPts = unaPerSessione(inP.filter(r => r.key === es && r.rir != null)).map(r => ({ x: dataBreve(r.data), y: r.rir }));
+  const rirT = recEs.at(-1)?.rirT || '';
+  const nums = (rirT.match(/\d+(?:[.,]\d+)?/g) || []).map(parseNum);
+  const target = nums.length ? nums.reduce((a, b) => a + b, 0) / nums.length : null;
+
+  PG = { pesoPts, unita, vol, rirPts, target };
+  const nomeEs = es ? nomi.get(es) : '';
+  const opz = [...nomi.entries()].sort((a, b) => a[1].localeCompare(b[1], 'it')).map(([k, n]) => `<option value="${esc(k)}"${k === es ? ' selected' : ''}>${esc(n)}</option>`).join('');
+  const segP = ['settimana', 'mese', 'anno'].map(p => `<button aria-pressed="${S.prog.periodo === p}" data-a="progPer" data-v="${p}">${cap(p)}</button>`).join('');
+  const segG = [['allenamento', 'Allenamento'], ['settimana', 'Settimana'], ['mese', 'Mese']].map(([v, l]) => `<button aria-pressed="${gran === v}" data-a="progGran" data-v="${v}">${l}</button>`).join('');
+  const vuoto = m => `<div class="empty">${m}</div>`;
+  const colVar = varz == null ? 'inherit' : varz > 0 ? 'var(--ok-ink)' : varz < 0 ? 'var(--acc)' : 'inherit';
+
+  return `<div class="scr" style="gap:16px">
+    <div class="head"><h1 class="big">Progressi</h1><span class="date">${R.length ? `${S.sessioni.length} allenamenti registrati in tutto` : 'Ancora nessun allenamento registrato'}</span></div>
+    <div class="seg" style="grid-template-columns:repeat(3,minmax(0,1fr))">${segP}</div>
+    <div class="pnav">
+      <button class="iconbtn" data-a="progNav" data-d="-1" aria-label="Periodo precedente">${ico('chevL')}</button>
+      <span class="lab">${esc(per.etichetta)}</span>
+      <button class="iconbtn" data-a="progNav" data-d="1" aria-label="Periodo successivo" ${S.prog.offset >= 0 ? 'disabled' : ''}>${ico('chevR')}</button>
+    </div>
+    ${!R.length ? vuoto('I grafici compariranno dopo il primo allenamento salvato.') : `
+    <div class="card">
+      <div class="fld" style="gap:6px">
+        <label for="prog-es" class="eyebrow" style="letter-spacing:.5px">${tipo === 'corpo_libero' ? 'Ripetizioni per esercizio' : 'Peso per esercizio'}</label>
+        <select class="inp" id="prog-es" data-ch="progEs">${opz}</select>
+        ${tipo === 'corpo_libero' ? '<span class="hint" style="font-size:12px">Esercizio a corpo libero: il grafico mostra le ripetizioni.</span>' : tipo === 'elastico' ? '<span class="hint" style="font-size:12px">Esercizio con elastico: il grafico mostra i kg dell\'elastico.</span>' : ''}
+      </div>
+      <div class="grid3" style="gap:8px">
+        <div class="head"><span class="date" style="font-size:12px">Ultimo</span><span class="num" style="font-size:26px">${ultimo != null ? fmtN(ultimo) + ' ' + unita : '—'}</span></div>
+        <div class="head"><span class="date" style="font-size:12px">${per.inizio}</span><span class="num" style="font-size:26px">${primo != null ? fmtN(primo) + ' ' + unita : '—'}</span></div>
+        <div class="head"><span class="date" style="font-size:12px">Variazione</span><span class="num" style="font-size:26px;color:${colVar}">${varz != null ? (varz > 0 ? '+' : '') + fmtN(varz) + ' ' + unita : '—'}</span></div>
+      </div>
+      ${pesoPts.length ? '<div class="chartbox"><canvas id="ch-peso" role="img" aria-label="Andamento nel periodo"></canvas></div>' : vuoto('Nessun dato per questo esercizio nel periodo.')}
+    </div>
+    <div class="card" style="gap:12px">
+      <div class="between" style="align-items:flex-end">
+        <div class="head"><span class="eyebrow" style="letter-spacing:.5px">Volume totale</span><span style="font-size:12px;color:var(--mut)">kg × ripetizioni × serie, solo esercizi con pesi</span></div>
+        <span class="num" style="font-size:26px;white-space:nowrap">${fmtInt(volTot)} kg</span>
+      </div>
+      <div class="seg small" style="grid-template-columns:repeat(3,minmax(0,1fr))">${segG}</div>
+      ${vol.length ? '<div class="chartbox"><canvas id="ch-vol" role="img" aria-label="Volume totale"></canvas></div>' : vuoto('Nessun esercizio con pesi nel periodo.')}
+    </div>
+    <div class="card" style="gap:12px">
+      <div class="head"><span class="eyebrow" style="letter-spacing:.5px">RIR percepito</span><span style="font-size:12px;color:var(--mut)">${esc(nomeEs)}</span></div>
+      <div class="legend"><span><span style="width:18px;height:3px;background:var(--acc);border-radius:2px"></span>Percepito</span>${target != null ? `<span><span style="width:18px;border-top:2px dashed var(--mut)"></span>Target (RIR ${esc(rirT)})</span>` : ''}</div>
+      ${rirPts.length ? '<div class="chartbox"><canvas id="ch-rir" role="img" aria-label="RIR percepito nel periodo"></canvas></div>' : vuoto('Nessun RIR registrato per questo esercizio nel periodo.')}
+    </div>`}
+  </div>`;
+};
+A.progPer = el => { S.prog.periodo = el.dataset.v; S.prog.offset = 0; S.prog.gran = null; render(); };
+A.progNav = el => { S.prog.offset = Math.min(0, S.prog.offset + Number(el.dataset.d)); render(); };
+A.progGran = el => { S.prog.gran = el.dataset.v; render(); };
+CH.progEs = el => { S.prog.es = el.value; render(); };
+
+function distruggiGrafici() { S.grafici.forEach(g => g.destroy()); S.grafici = []; }
+const etichetteBarre = {
+  id: 'etichetteBarre',
+  afterDatasetsDraw(ch) {
+    const d = ch.data.datasets[0].data;
+    if (d.length > 8) return;
+    const { ctx } = ch;
+    ctx.save(); ctx.textAlign = 'center';
+    ch.getDatasetMeta(0).data.forEach((bar, i) => {
+      const ultimo = i === d.length - 1;
+      ctx.font = `${ultimo ? 800 : 700} 11px Manrope, sans-serif`;
+      ctx.fillStyle = ultimo ? '#17191E' : '#3F444D';
+      ctx.fillText(fmtInt(d[i]), bar.x, bar.y - 6);
+    });
+    ctx.restore();
+  }
+};
+function graficoLinea(id, punti, unita, opz = {}) {
+  const el = document.getElementById(id);
+  if (!el || !window.Chart) return;
+  const n = punti.length, last = n - 1;
+  const ds = [{
+    data: punti.map(p => p.y), borderColor: '#B93D0B', borderWidth: 3, tension: 0,
+    pointRadius: punti.map((_, i) => i === last ? 5.5 : 4.5), pointBackgroundColor: punti.map((_, i) => i === last ? '#B93D0B' : '#FFFFFF'),
+    pointBorderColor: '#B93D0B', pointBorderWidth: 2.5, pointHoverRadius: 7
+  }];
+  if (opz.target != null) ds.push({ data: punti.map(() => opz.target), borderColor: '#5A5F69', borderWidth: 1.5, borderDash: [5, 5], pointRadius: 0, pointHoverRadius: 0 });
+  S.grafici.push(new Chart(el, {
+    type: 'line', data: { labels: punti.map(p => p.x), datasets: ds },
+    options: {
+      maintainAspectRatio: false, animation: false, layout: { padding: { top: 8, right: 8 } },
+      plugins: { legend: { display: false }, tooltip: { filter: it => it.datasetIndex === 0, displayColors: false, callbacks: { label: c => `${fmtN(c.parsed.y)} ${unita}` } } },
+      scales: {
+        x: { grid: { display: false }, border: { display: false }, ticks: { maxRotation: 0, autoSkip: true, maxTicksLimit: 6 } },
+        y: { grid: { color: '#EEEDE8' }, border: { display: false }, ticks: { maxTicksLimit: 5, stepSize: opz.step, callback: v => fmtN(v) }, min: opz.min, max: opz.max, grace: opz.min == null ? '10%' : 0 }
+      }
+    }
+  }));
+}
+DOPO.progressi = () => {
+  if (!window.Chart || !PG) return;
+  Chart.defaults.font.family = "'Manrope', system-ui, sans-serif";
+  Chart.defaults.font.size = 11;
+  Chart.defaults.color = '#5A5F69';
+  if (PG.pesoPts.length) graficoLinea('ch-peso', PG.pesoPts, PG.unita);
+  if (PG.rirPts.length) {
+    const max = Math.max(4, ...PG.rirPts.map(p => p.y), PG.target ?? 0);
+    graficoLinea('ch-rir', PG.rirPts, 'RIR', { target: PG.target, min: 0, max, step: 1 });
+  }
+  const el = document.getElementById('ch-vol');
+  if (el && PG.vol.length) {
+    const v = PG.vol;
+    S.grafici.push(new Chart(el, {
+      type: 'bar', plugins: [etichetteBarre],
+      data: { labels: v.map(g => g.lab), datasets: [{ data: v.map(g => Math.round(g.v)), backgroundColor: v.map((_, i) => i === v.length - 1 ? '#B93D0B' : '#E3C4B4'), borderRadius: 6, maxBarThickness: 48 }] },
+      options: {
+        maintainAspectRatio: false, animation: false, layout: { padding: { top: 22 } },
+        plugins: { legend: { display: false }, tooltip: { displayColors: false, callbacks: { label: c => `${fmtInt(c.parsed.y)} kg` } } },
+        scales: { x: { grid: { display: false }, border: { color: '#E4E2DC' }, ticks: { maxRotation: 0, autoSkip: true } }, y: { display: false, beginAtZero: true } }
+      }
+    }));
+  }
+};
+
+// =====================================================================
+//  GESTIONE SCHEDA
+// =====================================================================
+VISTE.scheda = () => {
+  const sc = S.stato.scheda, st = S.stato;
+  const riga = (attr, icona, t, sub, neutra) => `<${attr.startsWith('href') ? 'a' : 'button'} class="link-row" ${attr}>
+      <span class="ic${neutra ? ' neutral' : ''}">${ico(icona)}</span><span class="tx"><span class="t">${t}</span><span class="st">${sub}</span></span>${ico('chevR', 20, 2, '#5A5F69')}</${attr.startsWith('href') ? 'a' : 'button'}>`;
+  const account = S.archivio.locale
+    ? `${riga('data-a="cancellaProva"', 'trash', 'Cancella dati di prova', 'Svuota i dati salvati in questo browser', true)}`
+    : `<div class="card" style="padding:14px 16px;gap:4px;flex-direction:row;align-items:center"><span class="ic neutral">${ico('user')}</span>
+         <span class="tx" style="display:flex;flex-direction:column;flex-grow:1;min-width:0"><span style="font-size:13px;color:var(--mut);font-weight:600">Connesso come</span><span style="font-weight:700;overflow-wrap:anywhere">${esc(S.utente?.email || '')}</span></span></div>
+       <button class="btn-sec" data-a="logout">${ico('logout', 18)}Esci</button>`;
+  return `<div class="scr" style="gap:14px">
+    ${bannerProva()}
+    <div class="head" style="margin-bottom:4px"><h1 class="big">Scheda</h1><span class="date">Gestione della scheda e dei tuoi dati</span></div>
+    <div class="card">
+      <div class="head"><span class="eyebrow">Scheda attiva</span><span style="font-size:17px;font-weight:800">${esc(sc.nome)}</span>
+        <span class="date">${esc([sc.obiettivo, `${sc.giorni.length} giorni`, `${sc.settimane} settimane`].filter(Boolean).join(' · '))}</span></div>
+      <div class="between"><span style="font-size:14px;font-weight:600;color:var(--mut)">Settimana corrente</span><span class="num" style="font-size:22px">${st.settimana} <span style="color:var(--mut);font-weight:600">di ${sc.settimane}</span></span></div>
+    </div>
+    <h2 class="grp">Scheda</h2>
+    ${riga('href="#modifica"', 'pencil', 'Modifica scheda', 'Cambia esercizi, serie, ordine: modifiche permanenti')}
+    ${riga('href="#importa"', 'file', 'Importa nuova scheda', 'Da file JSON o incollando il testo')}
+    <h2 class="grp">Backup</h2>
+    ${riga('data-a="esporta"', 'download', 'Esporta backup', 'Scarica scheda, storico e note in un file JSON')}
+    <label class="link-row" for="file-backup"><span class="ic">${ico('upload')}</span><span class="tx"><span class="t">Importa backup</span><span class="st">Ripristina i dati da un file di backup</span></span>${ico('chevR', 20, 2, '#5A5F69')}</label>
+    <input type="file" id="file-backup" accept=".json,application/json" hidden data-ch="fileBackup">
+    <h2 class="grp">Account</h2>
+    ${account}
+  </div>`;
+};
+A.logout = async () => { if (await conferma({ titolo: 'Uscire?', testo: 'Per rientrare ti basterà accedere di nuovo con Google.', ok: 'Esci' })) { if (salvaT) await scriviStato(); FBX.A.signOut(FBX.auth); } };
+A.cancellaProva = async () => {
+  if (!await conferma({ titolo: 'Cancellare i dati di prova?', testo: 'Scheda, storico e note salvati in questo browser verranno eliminati. La scheda iniziale verrà ricaricata.', ok: 'Cancella tutto', pericolo: true })) return;
+  clearTimeout(salvaT); salvaT = null;
+  await S.archivio.cancellaTutto();
+  location.hash = 'home';
+  await caricaDati();
+  toast('Dati di prova cancellati');
+};
+A.esporta = () => {
+  const b = { tipo: TIPO_BACKUP, versione: 1, esportatoIl: new Date().toISOString(), stato: S.stato, sessioni: S.sessioni, note: S.note };
+  const url = URL.createObjectURL(new Blob([JSON.stringify(b, null, 2)], { type: 'application/json' }));
+  const a = document.createElement('a');
+  a.href = url; a.download = `backup-palestra-${oggiISO()}.json`;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 3000);
+  toast('Backup scaricato');
+};
+CH.fileBackup = async el => {
+  const f = el.files[0]; el.value = '';
+  if (!f) return;
+  let d;
+  try { d = JSON.parse(await f.text()); }
+  catch { avviso('File non valido', '<div class="err">Il file scelto non è un JSON valido. Scegli un file creato con «Esporta backup».</div>'); return; }
+  if (d?.tipo !== TIPO_BACKUP || !d.stato) {
+    const msg = Array.isArray(d?.giorni) ? 'Questo file è una scheda, non un backup: usa «Importa nuova scheda».' : 'Questo file non è un backup dell\'app. Scegli un file creato con «Esporta backup».';
+    avviso('File non valido', `<div class="err">${msg}</div>`); return;
+  }
+  const v = validaScheda(d.stato.scheda);
+  if (v.errori) { avviso('Backup danneggiato', `<p class="txt">La scheda contenuta nel backup non è valida.</p>${erroriHtml(v.errori)}`); return; }
+  const sessioni = (Array.isArray(d.sessioni) ? d.sessioni : []).filter(s => s && s.id && s.data && Array.isArray(s.esercizi));
+  const note = d.note && typeof d.note === 'object' ? d.note : {};
+  const quando = d.esportatoIl ? new Date(d.esportatoIl).toLocaleDateString('it-IT', { day: 'numeric', month: 'long', year: 'numeric' }) : 'data sconosciuta';
+  if (!await conferma({ titolo: 'Ripristinare il backup?', testo: `Backup del ${quando}: ${sessioni.length === 1 ? '1 allenamento' : sessioni.length + ' allenamenti'}, ${Object.keys(note).length === 1 ? '1 nota' : Object.keys(note).length + ' note'}. Sostituisce TUTTI i dati attuali (scheda, settimana, storico e note).`, ok: 'Ripristina backup', pericolo: true })) return;
+  const stato = completaStato({ ...d.stato, scheda: v.scheda });
+  try {
+    clearTimeout(salvaT); salvaT = null;
+    toast('Ripristino in corso…');
+    await S.archivio.sostituisciTutto({ stato, sessioni, note });
+  } catch (e) { console.error(e); avviso('Ripristino non riuscito', '<div class="err">Controlla la connessione e riprova.</div>'); return; }
+  S.stato = stato; S.sessioni = sessioni; S.note = note; S.giornoScelto = null;
+  vai('home'); toast('Backup ripristinato');
+};
+
+// ---------- importa nuova scheda ----------
+VISTE.importa = () => {
+  const r = S.importa;
+  let esito = '';
+  if (r?.errori) esito = erroriHtml(r.errori);
+  else if (r?.scheda) {
+    const sc = r.scheda;
+    const nRisc = sc.riscaldamento.reduce((t, s) => t + s.esercizi.length, 0);
+    esito = `<div class="ok-box"><div style="font-weight:800;font-size:15px;margin-bottom:4px">${ico('check', 16, 3)} Scheda valida</div>
+      <div><b>${esc(sc.nome)}</b>${sc.obiettivo ? ' · ' + esc(sc.obiettivo) : ''} · ${sc.settimane} settimane</div>
+      <div>${sc.giorni.map(g => `${esc(g.nome)}: ${g.esercizi.length} esercizi`).join(' · ')}</div>
+      <div>Riscaldamento: ${nRisc} esercizi</div></div>
+      <button class="btn-pri" data-a="applicaScheda">Sostituisci la scheda attiva</button>`;
+  }
+  return `<div class="scr sub nav">
+    <div class="topbar"><a class="iconbtn" href="#scheda" aria-label="Indietro">${ico('chevL')}</a>
+      <div class="tt"><h1>Importa nuova scheda</h1><span class="sub">Sostituisce la scheda attiva</span></div></div>
+    <p class="txt">Carica il file JSON della nuova scheda oppure incolla il testo. Prima di sostituire controllo che sia tutto corretto. Lo storico degli allenamenti resta e continua nei grafici.</p>
+    <label class="btn-sec" for="file-scheda">${ico('file', 18)}Scegli file JSON</label>
+    <input type="file" id="file-scheda" accept=".json,application/json,text/plain" hidden data-ch="fileScheda">
+    <div class="fld" style="gap:6px"><label for="testo-scheda">Oppure incolla qui il testo JSON</label>
+      <textarea class="inp code" id="testo-scheda" data-in="testoScheda" spellcheck="false" placeholder='{ "settimane": 6, "giorni": [ … ] }'>${esc(S.importaTesto)}</textarea></div>
+    <button class="btn-out" data-a="controllaScheda">Controlla la scheda</button>
+    <div id="imp-esito" style="display:flex;flex-direction:column;gap:14px">${esito}</div>
+  </div>`;
+};
+IN.testoScheda = el => { S.importaTesto = el.value; };
+CH.fileScheda = async el => {
+  const f = el.files[0]; el.value = '';
+  if (!f) return;
+  S.importaTesto = await f.text();
+  $('#testo-scheda').value = S.importaTesto;
+  A.controllaScheda();
+};
+A.controllaScheda = () => {
+  const t = S.importaTesto.trim();
+  if (!t) { S.importa = { errori: ['Scegli un file oppure incolla il testo della scheda.'] }; }
+  else {
+    let d;
+    try { d = JSON.parse(t); }
+    catch (e) {
+      const pos = /position (\d+)/.exec(e.message);
+      let dove = '';
+      if (pos) { const p = Number(pos[1]); const prima = t.slice(0, p).split('\n'); dove = ` Il problema è alla riga ${prima.length}, colonna ${prima.at(-1).length + 1}.`; }
+      S.importa = { errori: [`Il testo non è un JSON valido.${dove} Controlla virgole, parentesi e virgolette (spesso manca una virgola o ce n'è una di troppo prima di } o ]).`] };
+      return renderImporta();
+    }
+    S.importa = validaScheda(d);
+  }
+  renderImporta();
+};
+function renderImporta() { render(); $('#imp-esito')?.scrollIntoView({ block: 'start', behavior: 'smooth' }); }
+A.applicaScheda = async () => {
+  const sc = S.importa?.scheda;
+  if (!sc) return;
+  const s = sess();
+  if (!await conferma({ titolo: 'Sostituire la scheda attiva?', testo: `«${sc.nome}» prenderà il posto di «${S.stato.scheda.nome}» e la settimana tornerà a 1. Lo storico degli allenamenti resta.${s ? ' L\'allenamento in corso verrà annullato.' : ''}`, ok: 'Sostituisci scheda' })) return;
+  Object.assign(S.stato, { scheda: sc, settimana: 1, ultimoGiorno: null, completati: [], precedente: null, sessioneInCorso: null });
+  S.importa = null; S.importaTesto = ''; S.giornoScelto = null; S.modTab = null;
+  await scriviStato();
+  vai('home'); toast('Nuova scheda attiva: settimana 1');
+};
+
+// ---------- modifica permanente della scheda ----------
+VISTE.modifica = () => {
+  const sc = S.stato.scheda;
+  const tabs = [...sc.giorni.map(g => [g.id, g.id]), ['__risc', 'Riscaldamento']];
+  if (!S.modTab || !tabs.some(t => t[0] === S.modTab)) S.modTab = sc.giorni[0].id;
+  const segT = tabs.map(([v, l]) => `<button aria-pressed="${S.modTab === v}" data-a="modTab" data-v="${esc(v)}">${esc(l)}</button>`).join('');
+  const frecce = (attr, i, n) => `<div class="ord">
+      <button aria-label="Sposta su" ${attr} data-i="${i}" data-d="-1" ${i === 0 ? 'disabled' : ''}>${ico('up', 18)}</button>
+      <button aria-label="Sposta giù" ${attr} data-i="${i}" data-d="1" ${i === n - 1 ? 'disabled' : ''}>${ico('down', 18)}</button></div>`;
+  let corpo = '';
+  if (S.modTab === '__risc') {
+    corpo = sc.riscaldamento.map((sz, si) => `
+      <div class="between" style="margin-top:6px"><h2 class="grp" style="margin:0">${esc(sz.sezione)}</h2>
+        <button class="pill-btn" style="height:36px" data-a="modSez" data-s="${si}">${ico('pencil', 14)}Sezione</button></div>
+      ${sz.esercizi.map((e, i) => `<div class="ex" style="padding:8px 12px 8px 6px">${frecce(`data-a="riscSposta" data-s="${si}"`, i, sz.esercizi.length)}
+        <button class="body" data-a="modRisc" data-s="${si}" data-i="${i}"><span class="n">${esc(e.nome)}</span><span class="m">${esc(e.prescrizione || '—')}</span></button>
+        <button class="iconbtn plain" aria-label="Modifica" data-a="modRisc" data-s="${si}" data-i="${i}">${ico('pencil', 20)}</button></div>`).join('')}
+      <button class="btn-dash" data-a="modRisc" data-s="${si}" data-i="-1">${ico('plus', 18, 2.5)}Aggiungi a ${esc(sz.sezione)}</button>`).join('')
+      + `<button class="btn-dash" data-a="modSez" data-s="-1">${ico('plus', 18, 2.5)}Nuova sezione</button>`;
+  } else {
+    const g = giornoScheda(S.modTab);
+    corpo = `<div class="fld"><label for="m-giorno">Nome del giorno</label><input class="inp" id="m-giorno" value="${esc(g.nome)}" data-ch="nomeGiorno"></div>`
+      + g.esercizi.map((e, i) => {
+        const p = pianoSett(e);
+        return `<div class="ex" style="padding:8px 12px 8px 6px">${frecce(`data-a="modSposta"`, i, g.esercizi.length)}
+          <button class="body" data-a="modEs" data-i="${i}"><span class="n">${esc(e.nome)}</span>
+            <span class="m">${esc(e.categoria)} · ${p.serie} × ${p.ripetizioni}${e.perLato ? ' per lato' : ''} (sett. ${S.stato.settimana})${e.tipoCarico !== 'kg' ? ' · ' + TIPI[e.tipoCarico] : ''}</span></button>
+          <button class="iconbtn plain" aria-label="Modifica" data-a="modEs" data-i="${i}">${ico('pencil', 20)}</button></div>`;
+      }).join('')
+      + `<button class="btn-dash" data-a="modEs" data-i="-1">${ico('plus', 18, 2.5)}Aggiungi esercizio a ${esc(g.nome)}</button>`;
+  }
+  return `<div class="scr sub nav">
+    <div class="topbar"><a class="iconbtn" href="#scheda" aria-label="Indietro">${ico('chevL')}</a>
+      <div class="tt"><h1>Modifica scheda</h1><span class="sub">Le modifiche sono permanenti</span></div></div>
+    <div class="card" style="gap:12px">
+      <div class="fld"><label for="m-nome">Nome della scheda</label><input class="inp" id="m-nome" value="${esc(sc.nome)}" data-ch="schNome"></div>
+      <div class="grid2">
+        <div class="fld"><label for="m-obi">Obiettivo</label><input class="inp" id="m-obi" value="${esc(sc.obiettivo)}" data-ch="schObi"></div>
+        <div class="fld"><label for="m-sett">Numero di settimane</label><input class="inp" id="m-sett" inputmode="numeric" value="${sc.settimane}" data-ch="schSett"></div>
+      </div>
+    </div>
+    <div class="seg" style="grid-template-columns:repeat(${tabs.length - 1},minmax(0,1fr)) minmax(0,2.4fr)">${segT}</div>
+    ${corpo}
+  </div>`;
+};
+A.modTab = el => { S.modTab = el.dataset.v; render(); };
+CH.schNome = el => { const v = str(el.value); if (!v) { el.value = S.stato.scheda.nome; return; } S.stato.scheda.nome = v; salva(); toast('Nome salvato'); };
+CH.schObi = el => { S.stato.scheda.obiettivo = str(el.value); salva(); toast('Obiettivo salvato'); };
+CH.nomeGiorno = el => { const v = str(el.value); const g = giornoScheda(S.modTab); if (!v) { el.value = g.nome; return; } g.nome = v; salva(); toast('Nome del giorno salvato'); };
+CH.schSett = async el => {
+  const sc = S.stato.scheda, n = Number(el.value);
+  if (!Number.isInteger(n) || n < 1 || n > 52) { toast('Scrivi un numero da 1 a 52'); el.value = sc.settimane; return; }
+  if (n === sc.settimane) return;
+  if (n < sc.settimane && !await conferma({ titolo: `Ridurre a ${n} settimane?`, testo: `Serie e ripetizioni delle settimane dalla ${n + 1} alla ${sc.settimane} verranno eliminate da tutti gli esercizi.`, ok: 'Riduci', pericolo: true })) { el.value = sc.settimane; return; }
+  sc.giorni.forEach(g => g.esercizi.forEach(e => {
+    while (e.settimane.length < n) { const u = clone(e.settimane.at(-1)); delete u.nota; e.settimane.push(u); }
+    e.settimane.length = n;
+  }));
+  const prima = sc.settimane;
+  sc.settimane = n;
+  S.stato.settimana = Math.min(S.stato.settimana, n);
+  salva(); render(); toast(n > prima ?'Settimane aggiunte: controlla serie e ripetizioni' : `La scheda ora ha ${n} settimane`);
+};
+A.modSposta = el => {
+  const g = giornoScheda(S.modTab), i = Number(el.dataset.i), j = i + Number(el.dataset.d);
+  if (j < 0 || j >= g.esercizi.length) return;
+  [g.esercizi[i], g.esercizi[j]] = [g.esercizi[j], g.esercizi[i]];
+  salva(); render();
+};
+A.modEs = el => {
+  const sc = S.stato.scheda, g = giornoScheda(S.modTab), i = Number(el.dataset.i), nuovo = i < 0;
+  const e = nuovo ? { nome: '', categoria: 'Monoarticolari', tipoCarico: 'kg', perLato: false, settimane: Array.from({ length: sc.settimane }, () => ({ serie: 3, ripetizioni: 10 })), rir: '', tempo: '', recuperoSec: 60, note: '', videoUrl: '' } : g.esercizi[i];
+  const cats = [...new Set([...CATEGORIE, ...sc.giorni.flatMap(x => x.esercizi.map(y => y.categoria))])];
+  const righe = e.settimane.map((w, k) => `<div class="wrow"><span>Sett. ${k + 1}</span>
+      <input class="inp" id="m-s-${k}" inputmode="numeric" aria-label="Serie settimana ${k + 1}" value="${w.serie}"><span>×</span>
+      <input class="inp" id="m-r-${k}" inputmode="numeric" aria-label="Ripetizioni settimana ${k + 1}" value="${w.ripetizioni}">
+      <input class="inp nota" id="m-n-${k}" aria-label="Nota settimana ${k + 1}" placeholder="nota" value="${esc(w.nota || '')}"></div>`).join('');
+  apriFoglio(`<h2>${nuovo ? 'Nuovo esercizio' : 'Modifica esercizio'}</h2>
+    <p class="hint">${esc(g.nome)} · modifica permanente della scheda</p>
+    <div class="fld"><label for="m-e-nome">Nome</label><input class="inp" id="m-e-nome" value="${esc(e.nome)}" autocomplete="off"></div>
+    <div class="grid2">
+      <div class="fld"><label for="m-e-cat">Categoria</label><select class="inp" id="m-e-cat">${cats.map(c => `<option${c === e.categoria ? ' selected' : ''}>${esc(c)}</option>`).join('')}</select></div>
+      <div class="fld"><label for="m-e-tipo">Carico</label><select class="inp" id="m-e-tipo">${Object.entries(TIPI).map(([k, v]) => `<option value="${k}"${e.tipoCarico === k ? ' selected' : ''}>${v}</option>`).join('')}</select></div>
+    </div>
+    <label class="check"><input type="checkbox" id="m-e-lato"${e.perLato ? ' checked' : ''}>Ripetizioni per lato</label>
+    <div class="fld" style="gap:8px"><span class="lbl">Serie × ripetizioni per settimana (nota: es. «scarico»)</span>${righe}</div>
+    <div class="grid3">
+      <div class="fld"><label for="m-e-rir">RIR target</label><input class="inp" id="m-e-rir" value="${esc(e.rir)}"></div>
+      <div class="fld"><label for="m-e-tempo">Tempo</label><input class="inp" id="m-e-tempo" value="${esc(e.tempo)}" placeholder="2''/1''/2''"></div>
+      <div class="fld"><label for="m-e-rec">Recupero (s)</label><input class="inp" id="m-e-rec" inputmode="numeric" value="${e.recuperoSec}"></div>
+    </div>
+    <div class="fld"><label for="m-e-video">Link video YouTube</label><input class="inp" id="m-e-video" inputmode="url" value="${esc(e.videoUrl)}"></div>
+    <div class="fld"><label for="m-e-note">Note del trainer</label><textarea class="inp" id="m-e-note" rows="3">${esc(e.note)}</textarea></div>
+    <div id="m-err"></div>
+    <button class="btn-pri" data-a="salvaModEs" data-i="${i}">${nuovo ? 'Aggiungi alla scheda' : 'Salva modifiche'}</button>
+    ${nuovo ? '' : `<button class="btn-danger" data-a="eliminaModEs" data-i="${i}">${ico('trash', 18)}Elimina dalla scheda</button>`}
+    <button class="btn-txt" data-a="chiudiFoglio">Annulla</button>`);
+};
+A.salvaModEs = el => {
+  const sc = S.stato.scheda, g = giornoScheda(S.modTab), i = Number(el.dataset.i);
+  const grezzo = {
+    nome: $('#m-e-nome').value.replace(/\s+/g, ' '), categoria: $('#m-e-cat').value, tipoCarico: $('#m-e-tipo').value, perLato: $('#m-e-lato').checked,
+    settimane: Array.from({ length: sc.settimane }, (_, k) => ({ serie: $('#m-s-' + k).value, ripetizioni: $('#m-r-' + k).value, nota: $('#m-n-' + k).value })),
+    rir: $('#m-e-rir').value, tempo: $('#m-e-tempo').value, recuperoSec: $('#m-e-rec').value, videoUrl: $('#m-e-video').value, note: $('#m-e-note').value
+  };
+  const err = [];
+  const e = validaEsercizio(grezzo, sc.settimane, 'Esercizio', err);
+  if (!e) { $('#m-err').innerHTML = erroriHtml(err.map(x => x.replace(/"/g, ''))); return; }
+  if (i < 0) g.esercizi.push(e); else g.esercizi[i] = e;
+  salva(); chiudiFoglio(); render(); toast(i < 0 ? 'Esercizio aggiunto alla scheda' : 'Scheda aggiornata');
+};
+A.eliminaModEs = async el => {
+  const g = giornoScheda(S.modTab), i = Number(el.dataset.i);
+  if (g.esercizi.length === 1) { toast('Un giorno deve avere almeno un esercizio'); return; }
+  if (!await conferma({ titolo: 'Eliminare dalla scheda?', testo: `«${g.esercizi[i].nome}» verrà tolto in modo permanente da ${g.nome}. Lo storico già registrato resta.`, ok: 'Elimina', pericolo: true })) return;
+  g.esercizi.splice(i, 1);
+  salva(); render(); toast('Esercizio eliminato');
+};
+A.riscSposta = el => {
+  const sz = S.stato.scheda.riscaldamento[Number(el.dataset.s)], i = Number(el.dataset.i), j = i + Number(el.dataset.d);
+  if (j < 0 || j >= sz.esercizi.length) return;
+  [sz.esercizi[i], sz.esercizi[j]] = [sz.esercizi[j], sz.esercizi[i]];
+  salva(); render();
+};
+A.modRisc = el => {
+  const si = Number(el.dataset.s), i = Number(el.dataset.i), sz = S.stato.scheda.riscaldamento[si], nuovo = i < 0;
+  const e = nuovo ? { nome: '', prescrizione: '', videoUrl: '' } : sz.esercizi[i];
+  apriFoglio(`<h2>${nuovo ? 'Nuovo esercizio' : 'Modifica esercizio'}</h2><p class="hint">Riscaldamento · ${esc(sz.sezione)}</p>
+    <div class="fld"><label for="r-nome">Nome</label><input class="inp" id="r-nome" value="${esc(e.nome)}"></div>
+    <div class="fld"><label for="r-pre">Prescrizione</label><input class="inp" id="r-pre" value="${esc(e.prescrizione)}" placeholder="es. 1x12 per lato"></div>
+    <div class="fld"><label for="r-video">Link video YouTube</label><input class="inp" id="r-video" inputmode="url" value="${esc(e.videoUrl)}"></div>
+    <div id="r-err"></div>
+    <button class="btn-pri" data-a="salvaRisc" data-s="${si}" data-i="${i}">${nuovo ? 'Aggiungi' : 'Salva modifiche'}</button>
+    ${nuovo ? '' : `<button class="btn-danger" data-a="eliminaRisc" data-s="${si}" data-i="${i}">${ico('trash', 18)}Elimina</button>`}
+    <button class="btn-txt" data-a="chiudiFoglio">Annulla</button>`);
+};
+A.salvaRisc = el => {
+  const sz = S.stato.scheda.riscaldamento[Number(el.dataset.s)], i = Number(el.dataset.i);
+  const e = { nome: str($('#r-nome').value), prescrizione: str($('#r-pre').value), videoUrl: str($('#r-video').value) };
+  if (!e.nome) { $('#r-err').innerHTML = erroriHtml(['Scrivi il nome dell\'esercizio.']); return; }
+  if (i < 0) sz.esercizi.push(e); else sz.esercizi[i] = e;
+  salva(); chiudiFoglio(); render(); toast('Riscaldamento aggiornato');
+};
+A.eliminaRisc = async el => {
+  const sz = S.stato.scheda.riscaldamento[Number(el.dataset.s)], i = Number(el.dataset.i);
+  if (!await conferma({ titolo: 'Eliminare l\'esercizio?', testo: `«${sz.esercizi[i].nome}» verrà tolto dal riscaldamento.`, ok: 'Elimina', pericolo: true })) return;
+  sz.esercizi.splice(i, 1); salva(); render(); toast('Esercizio eliminato');
+};
+A.modSez = el => {
+  const si = Number(el.dataset.s), nuovo = si < 0, sz = nuovo ? { sezione: '', esercizi: [] } : S.stato.scheda.riscaldamento[si];
+  apriFoglio(`<h2>${nuovo ? 'Nuova sezione' : 'Sezione del riscaldamento'}</h2>
+    <div class="fld"><label for="z-nome">Nome della sezione</label><input class="inp" id="z-nome" value="${esc(sz.sezione)}" placeholder="es. Mobilità"></div>
+    <button class="btn-pri" data-a="salvaSez" data-s="${si}">${nuovo ? 'Crea sezione' : 'Salva'}</button>
+    ${nuovo ? '' : `<div class="grid2"><button class="btn-sec" data-a="spostaSez" data-s="${si}" data-d="-1">${ico('up', 18)}Su</button><button class="btn-sec" data-a="spostaSez" data-s="${si}" data-d="1">${ico('down', 18)}Giù</button></div>
+      <button class="btn-danger" data-a="eliminaSez" data-s="${si}">${ico('trash', 18)}Elimina sezione</button>`}
+    <button class="btn-txt" data-a="chiudiFoglio">Annulla</button>`);
+};
+A.salvaSez = el => {
+  const si = Number(el.dataset.s), nome = str($('#z-nome').value);
+  if (!nome) { toast('Scrivi il nome della sezione'); return; }
+  if (si < 0) S.stato.scheda.riscaldamento.push({ sezione: nome, esercizi: [] }); else S.stato.scheda.riscaldamento[si].sezione = nome;
+  salva(); chiudiFoglio(); render();
+};
+A.spostaSez = el => {
+  const r = S.stato.scheda.riscaldamento, i = Number(el.dataset.s), j = i + Number(el.dataset.d);
+  if (j < 0 || j >= r.length) return;
+  [r[i], r[j]] = [r[j], r[i]]; salva(); chiudiFoglio(); render();
+};
+A.eliminaSez = async el => {
+  const r = S.stato.scheda.riscaldamento, si = Number(el.dataset.s);
+  if (!await conferma({ titolo: 'Eliminare la sezione?', testo: `«${r[si].sezione}» e i suoi ${r[si].esercizi.length} esercizi verranno tolti dal riscaldamento.`, ok: 'Elimina sezione', pericolo: true })) return;
+  r.splice(si, 1); salva(); render(); toast('Sezione eliminata');
+};
+
+// =====================================================================
+//  ACCESSO E AVVIO
+// =====================================================================
+function vistaAccesso(msg = '') {
+  schermata(`<div class="scr center">
+    <div class="card" style="padding:24px;gap:16px">
+      <span class="ic" style="width:56px;height:56px;border-radius:16px">${ico('pulse', 28)}</span>
+      <div class="head"><h1 class="big">La mia scheda</h1><span class="date">Allenamento del giorno, timer e progressi</span></div>
+      <p class="txt">Accedi con il tuo account Google per vedere la scheda e salvare gli allenamenti.</p>
+      <button class="btn-pri" data-a="accedi">Accedi con Google</button>
+      ${msg ? `<div class="err">${msg}</div>` : ''}
+    </div></div>`);
+}
+function vistaErrore(titolo, msg, conEsci) {
+  schermata(`<div class="scr center"><div class="card" style="padding:24px">
+    <h1 style="margin:0;font-size:22px;font-weight:800">${esc(titolo)}</h1><p class="txt">${msg}</p>
+    ${conEsci ? '<button class="btn-sec" data-a="esci">Esci e cambia account</button>' : '<button class="btn-pri" data-a="ricarica">Riprova</button>'}
+  </div></div>`);
+}
+A.ricarica = () => location.reload();
+A.esci = () => FBX?.A.signOut(FBX.auth);
+A.accedi = async () => {
+  try { await FBX.A.signInWithPopup(FBX.auth, new FBX.A.GoogleAuthProvider()); }
+  catch (e) {
+    if (['auth/popup-closed-by-user', 'auth/cancelled-popup-request'].includes(e.code)) return;
+    const m = {
+      'auth/unauthorized-domain': 'Questo indirizzo non è tra i «Domini autorizzati» di Firebase. Aggiungilo in Authentication › Impostazioni (vedi la guida).',
+      'auth/popup-blocked': 'Il browser ha bloccato la finestra di accesso. Consenti i popup per questo sito e riprova.',
+      'auth/network-request-failed': 'Connessione assente o instabile. Riprova.',
+      'auth/operation-not-allowed': 'L\'accesso con Google non è attivo nel progetto Firebase (vedi la guida).'
+    }[e.code] || `Accesso non riuscito (${esc(e.code || e.message)}).`;
+    vistaAccesso(m);
+  }
+};
+
+async function caricaDati() {
+  try {
+    const d = await S.archivio.carica();
+    S.sessioni = d.sessioni || []; S.note = d.note || {};
+    S.stato = d.stato ? completaStato(d.stato) : null;
+    if (!S.stato) { S.stato = statoIniziale(); await S.archivio.salvaStato(S.stato); }
+  } catch (e) {
+    console.error(e);
+    S.stato = null;
+    if (e?.code === 'permission-denied') vistaErrore('Account non autorizzato', `L'account <b>${esc(S.utente?.email || '')}</b> non può usare questa app. Accedi con il tuo account Google.`, true);
+    else vistaErrore('Impossibile caricare i dati', 'Controlla la connessione e riprova.', false);
+    return;
+  }
+  render();
+  const r = rotta().nome;
+  const s = sess();
+  if (s && r !== 'giorno' && r !== 'esercizio') {
+    const di = new Date(s.inizio);
+    const quando = (di.toDateString() === new Date().toDateString() ? 'oggi' : di.toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'long' })) + ' alle ' + di.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+    if (await conferma({ titolo: 'Allenamento in corso', testo: `Hai un allenamento non concluso: ${s.nomeGiorno}, iniziato ${quando}. Vuoi riprenderlo?`, ok: 'Riprendi allenamento', annulla: 'Più tardi' })) vai('giorno');
+  }
+}
+
+async function avvio() {
+  if (!FIREBASE_CONFIG.apiKey) { S.archivio = creaArchivioLocale(); await caricaDati(); return; }
+  try {
+    const [app, auth, fs] = await Promise.all([import(FB_URL + 'firebase-app.js'), import(FB_URL + 'firebase-auth.js'), import(FB_URL + 'firebase-firestore.js')]);
+    const fa = app.initializeApp(FIREBASE_CONFIG);
+    FBX = { A: auth, F: fs, auth: auth.getAuth(fa), db: fs.getFirestore(fa) };
+    FBX.auth.languageCode = 'it';
+  } catch (e) { console.error(e); vistaErrore('Impossibile avviare l\'app', 'Non riesco a caricare Firebase. Controlla la connessione e riprova.', false); return; }
+  FBX.A.onAuthStateChanged(FBX.auth, async u => {
+    chiudiFoglio();
+    S.utente = u; S.stato = null;
+    if (!u) { vistaAccesso(); return; }
+    schermata('<div class="scr center"><p class="hint" style="text-align:center">Caricamento dei tuoi dati…</p></div>');
+    S.archivio = creaArchivioFirebase(u);
+    await caricaDati();
+  });
+}
+avvio();
+</script>
+</body>
+</html>
