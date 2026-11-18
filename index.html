@@ -185,6 +185,48 @@ select.inp{font-weight:700;font-size:15px;padding-right:8px}
 .legend{display:flex;gap:16px;font-size:12px;font-weight:600;color:var(--mut2);flex-wrap:wrap}
 .legend span{display:flex;align-items:center;gap:6px}
 
+/* progressi */
+.ex .m b.kg{color:var(--ink);font-weight:800;white-space:nowrap}
+.tile{background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.tile .k{font-size:11px;font-weight:700;color:var(--mut)}
+.tile .v{font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:700;line-height:1.1}
+.tile .v small{font-size:17px;color:var(--mut)}
+.dtabs{display:grid;gap:8px}
+.dtabs button{height:44px;border-radius:12px;border:1px solid var(--in);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;min-width:0;padding:0 4px;text-align:center}
+.dtabs button[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:#fff;font-weight:800}
+.pcard{padding:14px;gap:10px;border-radius:18px}
+.pmeta{font-size:12px;color:var(--mut);font-weight:600}
+.pgrid{display:grid;gap:4px}
+.pscroll{overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:4px}
+.pscroll .pgrid{width:max-content}
+.pc{border:1px solid var(--line);background:#fff;border-radius:10px;padding:6px 2px;display:flex;flex-direction:column;align-items:center;gap:1px;min-width:0;text-align:center}
+.pc.cur{border:2px solid var(--acc);padding:5px 1px}
+.pc.vuota{background:var(--bg);border-color:transparent}
+.pc.vuota.cur{border-color:var(--acc)}
+.pc .pl{font-size:10px;font-weight:800;color:var(--mut);white-space:nowrap}
+.pc .pv{font-family:'Barlow Condensed',sans-serif;font-size:21px;font-weight:700;line-height:1.1;font-variant-numeric:tabular-nums}
+.pc.vuota .pv{color:#9A9DA4}
+.pc .ps{font-size:11px;font-weight:600;white-space:nowrap}
+.pc.vuota .ps{color:var(--mut)}
+.pc .ps.diff{color:var(--acc);font-weight:800}
+.pc .ps.sk{color:var(--acc-h);font-weight:700;font-size:10px}
+.pc .pr{font-size:10px;color:var(--mut);font-weight:600;white-space:nowrap}
+.pone{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;background:var(--bg);border-radius:12px;padding:10px 12px;font-size:13px;font-weight:600;color:var(--mut2)}
+.pone .pv{font-family:'Barlow Condensed',sans-serif;font-size:24px;font-weight:700;color:var(--ink)}
+.plink{font-size:13px;font-weight:700;text-decoration:none;align-self:flex-start;padding:4px 0}
+.hrow{display:grid;grid-template-columns:1fr auto;gap:2px 10px;padding:10px 0;border-bottom:1px solid var(--line)}
+.hrow:last-child{border-bottom:0}
+.hrow .hd{font-size:14px;font-weight:700;display:flex;flex-direction:column}
+.hrow .hd small{font-size:12px;color:var(--mut);font-weight:600}
+.hrow .hv{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:700;text-align:right}
+.hrow .hs{grid-column:1/-1;font-size:13px;color:var(--mut2)}
+/* editor settimane */
+.wcard{background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px;display:flex;flex-direction:column;gap:8px}
+.wcard .wt{font-size:13px;font-weight:800}
+.wgrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.wgrid .inp{height:44px;padding:0 6px;text-align:center}
+.wcard .inp.nota{height:40px;font-size:14px}
+
 /* nav */
 #nav{position:fixed;left:0;right:0;bottom:0;z-index:20;background:#fff;border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}
 #nav .in{max-width:480px;margin:0 auto;height:76px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr))}
@@ -284,7 +326,7 @@ function miniatura(url) {
 }
 
 let toastT;
-function toast(msg) { const t = $('#toast'); t.textContent = msg; t.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('on'), 2600); }
+function toast(msg, ms = 2600) { const t = $('#toast'); t.textContent = msg; t.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('on'), ms); }
 
 // ---------- validazione della scheda ----------
 function validaScheda(d) {
@@ -292,7 +334,10 @@ function validaScheda(d) {
   if (!d || typeof d !== 'object' || Array.isArray(d)) return { errori: ['Il file non contiene una scheda: mi aspettavo un oggetto JSON con "settimane" e "giorni".'] };
   const nS = Number(d.settimane);
   if (!Number.isInteger(nS) || nS < 1 || nS > 52) err.push('"settimane" (in cima al file) deve essere un numero intero da 1 a 52.');
-  const out = { schemaVersion: 1, nome: str(d.nome) || 'Scheda', obiettivo: str(d.obiettivo), settimane: nS, riscaldamento: [], giorni: [] };
+  const out = { schemaVersion: 2, nome: str(d.nome) || 'Scheda', obiettivo: str(d.obiettivo), settimane: nS, riscaldamento: [], giorni: [] };
+  // identificativo della scheda (serve a non mescolare lo storico di schede diverse)
+  if (str(d.id)) out.id = str(d.id);
+  if (d.legacy === true) out.legacy = true;
   if (d.riscaldamento != null) {
     if (!Array.isArray(d.riscaldamento)) err.push('"riscaldamento" deve essere un elenco di sezioni.');
     else d.riscaldamento.forEach((s, i) => {
@@ -345,13 +390,23 @@ function validaEsercizio(e, nS, dove, err) {
       if (!Number.isInteger(ri) || ri < 1) err.push(`${dove}, settimana ${k + 1}: "ripetizioni" deve essere un numero intero maggiore di 0.`);
       const o = { serie: se, ripetizioni: ri };
       if (str(w?.nota)) o.nota = str(w.nota);
+      // recupero e RIR della singola settimana (facoltativi: se mancano valgono quelli dell'esercizio)
+      if (w?.recuperoSec != null && w.recuperoSec !== '') {
+        const r = Number(w.recuperoSec);
+        if (!Number.isInteger(r) || r < 0) err.push(`${dove}, settimana ${k + 1}: "recuperoSec" deve essere un numero intero di secondi.`);
+        else o.recuperoSec = r;
+      }
+      if (str(w?.rir)) o.rir = str(w.rir);
       sett.push(o);
     });
   }
   const rec = e.recuperoSec == null || e.recuperoSec === '' ? 0 : Number(e.recuperoSec);
   if (!Number.isInteger(rec) || rec < 0) err.push(`${dove}: "recuperoSec" deve essere un numero intero di secondi (0 se non indicato).`);
   if (err.length > n0) return null;
-  return { nome, categoria: str(e.categoria) || 'Altro', tipoCarico: tipo, perLato: !!e.perLato, settimane: sett, rir: str(e.rir), tempo: str(e.tempo), recuperoSec: rec, note: str(e.note), videoUrl: str(e.videoUrl) };
+  const rir = str(e.rir);
+  // i valori della settimana uguali a quelli dell'esercizio non servono: così cambiando il valore generale cambiano tutte le settimane
+  sett.forEach(o => { if (o.recuperoSec === rec) delete o.recuperoSec; if (o.rir != null && o.rir === rir) delete o.rir; });
+  return { nome, categoria: str(e.categoria) || 'Altro', tipoCarico: tipo, perLato: !!e.perLato, settimane: sett, rir, tempo: str(e.tempo), recuperoSec: rec, note: str(e.note), videoUrl: str(e.videoUrl) };
 }
 function erroriHtml(errori) {
   const max = 15, extra = errori.length - max;
@@ -415,13 +470,17 @@ function creaArchivioFirebase(utente) {
 // ---------- stato dell'app ----------
 const S = {
   archivio: null, stato: null, sessioni: [], note: {}, utente: null,
-  giornoScelto: null, prog: { periodo: 'mese', offset: 0, es: null, gran: null },
+  giornoScelto: null, prog: { periodo: 'scheda', offset: 0, giorno: null },
   modTab: null, importa: null, importaTesto: '', grafici: []
 };
 const sess = () => S.stato?.sessioneInCorso || null;
 const giornoScheda = id => S.stato.scheda.giorni.find(g => g.id === id);
 const esDaUid = uid => sess()?.esercizi.find(e => e.uid === uid);
 function pianoSett(e) { const w = Math.min(S.stato.settimana, e.settimane.length) - 1; return e.settimane[Math.max(0, w)]; }
+// recupero e RIR previsti per quell'esercizio in quella settimana
+const recSett = (e, p) => p?.recuperoSec ?? e.recuperoSec ?? 0;
+const rirSett = (e, p) => p?.rir ?? e.rir ?? '';
+const nuovoIdScheda = () => 'sch-' + rid();
 function prossimoGiorno() {
   const g = S.stato.scheda.giorni;
   const i = g.findIndex(x => x.id === S.stato.ultimoGiorno);
@@ -429,11 +488,14 @@ function prossimoGiorno() {
 }
 function statoIniziale() {
   const v = validaScheda(JSON.parse($('#scheda-iniziale').textContent));
-  return { scheda: v.scheda, settimana: 1, ultimoGiorno: null, completati: [], precedente: null, sessioneInCorso: null };
+  return { scheda: { ...v.scheda, id: nuovoIdScheda() }, settimana: 1, ciclo: 1, ultimoGiorno: null, completati: [], precedente: null, sessioneInCorso: null };
 }
 function completaStato(st) {
-  const s = { settimana: 1, ultimoGiorno: null, completati: [], precedente: null, sessioneInCorso: null, ...st };
+  const s = { settimana: 1, ciclo: 1, ultimoGiorno: null, completati: [], precedente: null, sessioneInCorso: null, ...st };
   s.settimana = Math.min(Math.max(1, s.settimana | 0), s.scheda.settimane);
+  s.ciclo = Math.max(1, s.ciclo | 0);
+  // scheda creata prima della versione 2: le diamo un identificativo e le assegniamo lo storico già registrato
+  if (!s.scheda.id) { s.scheda = { ...s.scheda, id: nuovoIdScheda(), legacy: true }; s._daSalvare = true; }
   return s;
 }
 
@@ -461,7 +523,7 @@ function render() {
   if ((nome === 'giorno' || nome === 'esercizio') && !sess()) nome = 'home';
   if (nome === 'esercizio' && !esDaUid(arg)) nome = 'giorno';
   if (!VISTE[nome]) nome = 'home';
-  const tab = { home: 'home', riscaldamento: 'riscaldamento', progressi: 'progressi', scheda: 'scheda', modifica: 'scheda', importa: 'scheda' }[nome];
+  const tab = { home: 'home', riscaldamento: 'riscaldamento', progressi: 'progressi', progEs: 'progressi', scheda: 'scheda', modifica: 'scheda', importa: 'scheda' }[nome];
   $('#main').innerHTML = VISTE[nome](arg);
   $('#nav').hidden = !tab;
   document.querySelectorAll('#nav a').forEach(a => { if (a.dataset.tab === tab) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
@@ -599,11 +661,11 @@ A.iniziaGiorno = el => {
   vai('giorno');
 };
 function daScheda(e) {
-  const p = pianoSett(e);
+  const p = pianoSett(e), rec = recSett(e, p);
   return {
     uid: rid(), nome: e.nome, categoria: e.categoria, tipoCarico: e.tipoCarico, perLato: !!e.perLato,
-    serie: p.serie, ripetizioni: p.ripetizioni, notaSett: p.nota || '', rir: e.rir, tempo: e.tempo, recuperoSec: e.recuperoSec,
-    note: e.note, videoUrl: e.videoUrl, stato: 'da_fare', serieFatte: 0, durata: e.recuperoSec || 90,
+    serie: p.serie, ripetizioni: p.ripetizioni, notaSett: p.nota || '', rir: rirSett(e, p), tempo: e.tempo, recuperoSec: rec,
+    note: e.note, videoUrl: e.videoUrl, stato: 'da_fare', serieFatte: 0, durata: rec || 90,
     bozza: null, risultato: null, nomeOriginale: null, aggiunto: false
   };
 }
@@ -615,7 +677,8 @@ A.settAvanti = async () => {
     const ok = await conferma({ titolo: `Passare alla settimana ${dest}?`, testo: `Questa settimana non hai ancora completato: ${mancano.join(', ')}.`, ok: `Passa alla settimana ${dest}` });
     if (!ok) return;
   }
-  st.precedente = { settimana: st.settimana, completati: st.completati, ultimoGiorno: st.ultimoGiorno };
+  st.precedente = { settimana: st.settimana, completati: st.completati, ultimoGiorno: st.ultimoGiorno, ciclo: st.ciclo || 1 };
+  if (dest === 1 && st.settimana >= n) st.ciclo = (st.ciclo || 1) + 1;
   st.settimana = dest; st.completati = []; S.giornoScelto = null;
   salva(); render(); toast(`Settimana ${dest} di ${n}`);
 };
@@ -624,7 +687,7 @@ A.settIndietro = () => {
   const prec = st.precedente;
   const dest = st.settimana > 1 ? st.settimana - 1 : prec?.settimana;
   if (!dest) return;
-  if (prec && prec.settimana === dest) { st.completati = prec.completati || []; }
+  if (prec && prec.settimana === dest) { st.completati = prec.completati || []; if (prec.ciclo) st.ciclo = prec.ciclo; }
   else st.completati = [];
   st.precedente = null; st.settimana = dest; S.giornoScelto = null;
   salva(); render(); toast(`Tornato alla settimana ${dest}`);
@@ -654,6 +717,22 @@ function correnteUid() {
 function metaEs(e) {
   return [`${e.serie} × ${e.ripetizioni}${e.perLato ? ' per lato' : ''}`, e.rir ? `RIR ${e.rir}` : '', e.recuperoSec ? `Rec. ${fmtRec(e.recuperoSec)}` : '', e.tempo ? `Tempo ${e.tempo}` : ''].filter(Boolean).join(' · ');
 }
+// ---------- storico per esercizio ----------
+function sessOrdinate() { return [...S.sessioni].sort((a, b) => new Date(a.data) - new Date(b.data)); }
+// ultima volta che l'esercizio è stato registrato (negli allenamenti salvati)
+function ultimoRisultato(nome, conPeso = false) {
+  const k = norm(nome), ss = sessOrdinate();
+  for (let i = ss.length - 1; i >= 0; i--) {
+    const e = (ss[i].esercizi || []).find(x => norm(x.nome) === k && (!conPeso || x.peso != null));
+    if (e) return { ...e, data: ss[i].data };
+  }
+  return null;
+}
+// peso da proporre: quello usato l'ultima volta su questo esercizio
+function pesoProposto(e) {
+  if (e.tipoCarico === 'corpo_libero') return null;
+  return ultimoRisultato(e.nome, true)?.peso ?? null;
+}
 function pesoTesto(e, r) {
   if (e.tipoCarico === 'corpo_libero') return 'corpo libero';
   if (r.peso == null) return '';
@@ -676,10 +755,12 @@ VISTE.giorno = () => {
     if (e.aggiunto) chips.push('<span class="chip">Aggiunto oggi</span>');
     if (e.nomeOriginale) chips.push(`<span class="chip">Al posto di ${esc(e.nomeOriginale)}</span>`);
     const mia = S.note[norm(e.nome)]?.testo;
+    const pp = !done ? pesoProposto(e) : null;
+    const pesoMeta = pp != null ? ` · <b class="kg">${e.tipoCarico === 'elastico' ? 'elastico ' : ''}${fmtN(pp)} kg</b>` : '';
     h += `<div class="ex${isCur ? ' cur' : ''}${done ? ' done' : ''}${skip ? ' skip' : ''}">
       ${miniatura(e.videoUrl)}
       <button class="body" data-a="apriEs" data-u="${e.uid}">
-        <span class="n">${esc(e.nome)}</span><span class="m">${esc(metaEs(e))}</span>
+        <span class="n">${esc(e.nome)}</span><span class="m">${esc(metaEs(e))}${pesoMeta}</span>
         ${e.note ? `<span class="tn">${esc(e.note)}</span>` : ''}
         ${mia ? `<span class="tn"><b>Mia nota:</b> ${esc(mia)}</span>` : ''}
         ${chips.length ? `<span class="chips">${chips.join('')}</span>` : ''}
@@ -721,7 +802,7 @@ A.fineAllenamento = async () => {
   }
   const rec = {
     id: s.id, data: new Date().toISOString(), inizio: s.inizio, giorno: s.giorno, nomeGiorno: s.nomeGiorno, settimana: s.settimana,
-    scheda: S.stato.scheda.nome,
+    scheda: S.stato.scheda.nome, schedaId: S.stato.scheda.id, ciclo: S.stato.ciclo || 1,
     esercizi: fatti.map(e => ({
       nome: e.nome, nomeOriginale: e.nomeOriginale || null, categoria: e.categoria, tipoCarico: e.tipoCarico, perLato: !!e.perLato,
       previsto: { serie: e.serie, ripetizioni: e.ripetizioni, rir: e.rir || '' },
@@ -738,6 +819,12 @@ A.fineAllenamento = async () => {
   S.stato.sessioneInCorso = null; S.giornoScelto = null;
   await scriviStato();
   vai('home'); toast('Allenamento salvato');
+  // ultimo giorno dell'ultima settimana: proponi il report per il PT
+  const st = S.stato, sc = st.scheda;
+  if (st.settimana >= sc.settimane && sc.giorni.every(g => st.completati.includes(g.id))) {
+    const ok = await conferma({ titolo: 'Scheda completata!', testo: `Hai finito tutte le ${sc.settimane} settimane. Vuoi scaricare il report dei progressi da mandare al tuo personal trainer?`, ok: 'Scarica report per il PT', annulla: 'Più tardi' });
+    if (ok) { S.prog.periodo = 'scheda'; S.prog.offset = 0; scaricaReport(); }
+  }
 };
 
 // ---------- modifica solo per oggi ----------
@@ -878,13 +965,16 @@ VISTE.esercizio = uid => {
 };
 function valoriForm(e) {
   const r = e.bozza || (e.risultato ? { peso: e.risultato.peso == null ? '' : String(e.risultato.peso).replace('.', ','), serie: e.risultato.serie, ripetizioni: e.risultato.ripetizioni, rir: e.risultato.rir } : null);
-  return r || { peso: '', serie: e.serie, ripetizioni: e.ripetizioni, rir: null };
+  if (r) return r;
+  const pp = pesoProposto(e);
+  return { peso: pp == null ? '' : String(pp).replace('.', ','), serie: e.serie, ripetizioni: e.ripetizioni, rir: null, proposto: pp != null };
 }
 function formCompletato(e) {
   const v = valoriForm(e);
   const campoPeso = e.tipoCarico === 'corpo_libero'
     ? `<div class="fld"><span class="lbl">Carico</span><div class="static">Corpo libero</div></div>`
     : `<div class="fld"><label for="f-peso">${e.tipoCarico === 'elastico' ? 'Elastico (kg)' : 'Peso (kg)'}</label><input class="inp big" id="f-peso" inputmode="decimal" placeholder="0" value="${esc(v.peso)}" data-in="bozza" data-u="${e.uid}" autocomplete="off"></div>`;
+  const notaPeso = v.proposto ? '<p class="hint" style="font-size:12px;margin-top:-6px">Peso dell\'ultima volta: se aumenti, scrivi il nuovo e lo ritrovi la prossima volta.</p>' : '';
   const rir = [0, 1, 2, 3, 4].map(n => `<button aria-pressed="${v.rir === n}" data-a="rir" data-u="${e.uid}" data-v="${n}">${n === 4 ? '4+' : n}</button>`).join('');
   const fatto = e.stato === 'fatto';
   return `<div class="card" style="padding:16px">
@@ -894,6 +984,7 @@ function formCompletato(e) {
       <div class="fld"><label for="f-serie">Serie</label><input class="inp big" id="f-serie" inputmode="numeric" value="${esc(v.serie)}" data-in="bozza" data-u="${e.uid}" autocomplete="off"></div>
       <div class="fld"><label for="f-rip">Ripetizioni</label><input class="inp big" id="f-rip" inputmode="numeric" value="${esc(v.ripetizioni)}" data-in="bozza" data-u="${e.uid}" autocomplete="off"></div>
     </div>
+    ${notaPeso}
     <div class="fld" style="gap:6px"><span class="lbl">RIR percepito</span><div class="rir" role="group" aria-label="RIR percepito">${rir}</div></div>
     <div id="f-err"></div>
     <button class="btn-pri" data-a="salvaEs" data-u="${e.uid}">${fatto ? 'Aggiorna i dati' : 'Salva e vai al prossimo'}</button>
@@ -927,15 +1018,30 @@ A.salvaEs = el => {
   e.risultato = { peso, serie, ripetizioni: rip, rir: b.rir ?? null };
   e.stato = 'fatto'; e.bozza = null;
   salva();
-  if (giaFatto) { vai('giorno'); toast('Dati aggiornati'); return; }
-  vaiAlProssimo(e, 'Salvato');
+  const riep = riepilogoEs(e);
+  if (giaFatto) { vai('giorno'); toast('Aggiornato: ' + riep, 4500); return; }
+  vaiAlProssimo(e, riep);
 };
+// riepilogo dopo il salvataggio: cosa ho fatto e differenza con l'ultima volta (niente volume)
+function riepilogoEs(e) {
+  const r = e.risultato;
+  const parti = [pesoTesto(e, r), `${r.serie}×${r.ripetizioni}`, r.rir != null ? `RIR ${r.rir === 4 ? '4+' : r.rir}` : ''].filter(Boolean);
+  let diff = '';
+  const prima = e.tipoCarico === 'corpo_libero' ? ultimoRisultato(e.nome) : ultimoRisultato(e.nome, true);
+  if (prima) {
+    const d = e.tipoCarico === 'corpo_libero' ? r.ripetizioni - prima.ripetizioni : r.peso - prima.peso;
+    const u = e.tipoCarico === 'corpo_libero' ? ' rip.' : ' kg';
+    diff = d === 0 ? ' (come l\'ultima volta)' : ` (${d > 0 ? '+' : ''}${fmtN(d)}${u} rispetto all'ultima volta)`;
+  }
+  return `${e.nome}: ${parti.join(' · ')}${diff}`;
+}
 function vaiAlProssimo(e, msg) {
   const s = sess(), i = s.esercizi.indexOf(e);
   if (s.timer && s.timer.fine <= Date.now()) s.timer = null;
   const next = s.esercizi.slice(i + 1).find(x => x.stato === 'da_fare') || s.esercizi.find(x => x.stato === 'da_fare');
-  if (next) { s.corrente = next.uid; salva(); vai('esercizio/' + next.uid); toast(`${msg}. Ora: ${next.nome}`); }
-  else { vai('giorno'); toast('Esercizi finiti: premi «Fine allenamento»'); }
+  const lungo = e.stato === 'fatto';
+  if (next) { s.corrente = next.uid; salva(); vai('esercizio/' + next.uid); toast(`${lungo ? 'Salvato · ' : ''}${msg}. Ora: ${next.nome}`, lungo ? 4500 : 2600); }
+  else { vai('giorno'); toast(`${lungo ? 'Salvato · ' + msg + '. ' : ''}Esercizi finiti: premi «Fine allenamento»`, lungo ? 4500 : 2600); }
 }
 
 // ---------- note personali ----------
@@ -1038,140 +1144,279 @@ setInterval(() => {
 // =====================================================================
 //  PROGRESSI
 // =====================================================================
-function periodoCorrente() {
-  const { periodo, offset } = S.prog, ora = new Date();
-  let a, b, etichetta, inizio;
+const MESI = ['Gen', 'Feb', 'Mar', 'Apr', 'Mag', 'Giu', 'Lug', 'Ago', 'Set', 'Ott', 'Nov', 'Dic'];
+const rirTxt = v => v == null ? '' : 'RIR ' + (v >= 4 ? '4+' : v);
+function lunedi(d) { const x = new Date(d.getFullYear(), d.getMonth(), d.getDate()); x.setDate(x.getDate() - (x.getDay() + 6) % 7); return x; }
+// una sessione appartiene alla scheda se ne porta l'identificativo; quelle registrate prima della versione 2 vanno alla scheda di allora
+const sessDellaScheda = (s, sc) => s.schedaId ? s.schedaId === sc.id : !!sc.legacy;
+const valoreEs = (r, tipo) => r == null ? null : tipo === 'corpo_libero' ? r.ripetizioni : r.peso;
+const unitaBreve = tipo => tipo === 'corpo_libero' ? 'rip.' : 'kg';
+
+// colonne del periodo: settimane della scheda, una settimana, settimane del mese, mesi dell'anno
+function periodoProg() {
+  const { periodo, offset } = S.prog, st = S.stato, sc = st.scheda, ora = new Date();
+  const cicloAtt = st.ciclo || 1;
+  if (periodo === 'scheda') {
+    const ciclo = Math.max(1, cicloAtt + offset), corrente = ciclo === cicloAtt;
+    const cols = Array.from({ length: sc.settimane }, (_, i) => ({
+      lab: 'S' + (i + 1), lungo: 'SETT. ' + (i + 1), sett: i + 1,
+      prende: s => s.settimana === i + 1,
+      futura: corrente && i + 1 > st.settimana, attuale: corrente && i + 1 === st.settimana
+    }));
+    const sessioni = S.sessioni.filter(s => sessDellaScheda(s, sc) && (s.ciclo || 1) === ciclo);
+    return {
+      periodo, cols, sessioni, scheda: true, ciclo, previsti: sc.giorni.length * sc.settimane,
+      etichetta: (cicloAtt > 1 ? `Ciclo ${ciclo} · ` : '') + `Settimane 1–${sc.settimane}`,
+      indietro: ciclo > 1, avanti: !corrente
+    };
+  }
+  let a, b, etichetta, cols;
   if (periodo === 'settimana') {
-    const d = new Date(ora.getFullYear(), ora.getMonth(), ora.getDate());
-    a = new Date(d); a.setDate(d.getDate() - (d.getDay() + 6) % 7 + 7 * offset);
+    a = lunedi(ora); a.setDate(a.getDate() + 7 * offset);
     b = new Date(a); b.setDate(a.getDate() + 7);
     const ult = new Date(b); ult.setDate(b.getDate() - 1);
-    etichetta = `${dataBreve(a)} – ${dataBreve(ult)} ${ult.getFullYear()}`; inizio = 'Inizio sett.';
+    etichetta = `${dataBreve(a)} – ${dataBreve(ult)} ${ult.getFullYear()}`;
+    cols = [{ lab: 'Sett.', lungo: 'SETTIMANA', da: a, a: b }];
   } else if (periodo === 'mese') {
     a = new Date(ora.getFullYear(), ora.getMonth() + offset, 1); b = new Date(a.getFullYear(), a.getMonth() + 1, 1);
-    etichetta = cap(a.toLocaleDateString('it-IT', { month: 'long', year: 'numeric' })); inizio = 'Inizio mese';
+    etichetta = cap(a.toLocaleDateString('it-IT', { month: 'long', year: 'numeric' }));
+    cols = [];
+    for (let l = lunedi(a); l < b; l = new Date(l.getFullYear(), l.getMonth(), l.getDate() + 7)) {
+      const da = l < a ? a : l, f = new Date(l.getFullYear(), l.getMonth(), l.getDate() + 7), fine = f > b ? b : f;
+      const ult = new Date(fine); ult.setDate(fine.getDate() - 1);
+      cols.push({ lab: da.getDate() === ult.getDate() ? String(da.getDate()) : `${da.getDate()}–${ult.getDate()}`, lungo: `${dataBreve(da)} – ${dataBreve(ult)}`.toUpperCase(), da, a: fine });
+    }
   } else {
     a = new Date(ora.getFullYear() + offset, 0, 1); b = new Date(a.getFullYear() + 1, 0, 1);
-    etichetta = String(a.getFullYear()); inizio = 'Inizio anno';
+    etichetta = String(a.getFullYear());
+    cols = MESI.map((m, i) => ({ lab: m, lungo: m.toUpperCase(), da: new Date(a.getFullYear(), i, 1), a: new Date(a.getFullYear(), i + 1, 1), attuale: offset === 0 && i === ora.getMonth() }));
   }
-  return { a, b, etichetta, inizio };
+  cols.forEach(c => { c.prende = s => { const d = new Date(s.data); return d >= c.da && d < c.a; }; });
+  const sessioni = S.sessioni.filter(s => { const d = new Date(s.data); return d >= a && d < b; });
+  return { periodo, cols, sessioni, scheda: false, etichetta, indietro: true, avanti: offset < 0 };
 }
-function registrazioni() {
-  const out = [];
-  for (const s of S.sessioni) {
-    const d = new Date(s.data);
-    for (const e of s.esercizi || []) out.push({ sid: s.id, data: d, key: norm(e.nome), nome: e.nome, tipo: e.tipoCarico, peso: e.peso, serie: e.serie, rip: e.ripetizioni, rir: e.rirPercepito, rirT: e.previsto?.rir || '' });
-  }
-  return out.sort((x, y) => x.data - y.data);
+function giorniProg(P) {
+  const ids = S.stato.scheda.giorni.map(g => g.id);
+  P.sessioni.forEach(s => { if (s.giorno && !ids.includes(s.giorno)) ids.push(s.giorno); });
+  return ids;
 }
-function unaPerSessione(lista) { const m = new Map(); lista.forEach(r => m.set(r.sid, r)); return [...m.values()]; }
-function lunedi(d) { const x = new Date(d.getFullYear(), d.getMonth(), d.getDate()); x.setDate(x.getDate() - (x.getDay() + 6) % 7); return x; }
-let PG = null;
-VISTE.progressi = () => {
-  const R = registrazioni();
-  const per = periodoCorrente();
-  const inP = R.filter(r => r.data >= per.a && r.data < per.b);
-  const nomi = new Map(); R.forEach(r => nomi.set(r.key, r.nome));
-  if (!S.prog.es || !nomi.has(S.prog.es)) S.prog.es = (inP.at(-1) || R.at(-1))?.key || null;
-  const es = S.prog.es;
-  const gran = S.prog.gran || { settimana: 'allenamento', mese: 'settimana', anno: 'mese' }[S.prog.periodo];
+function nomeGiornoProg(P, id) { return giornoScheda(id)?.nome || P.sessioni.find(s => s.giorno === id)?.nomeGiorno || 'Giorno ' + id; }
 
-  // peso / ripetizioni
-  const recEs = R.filter(r => r.key === es);
-  const tipo = recEs.at(-1)?.tipo || 'kg';
-  const unita = tipo === 'corpo_libero' ? 'rip' : 'kg';
-  const pesoPts = unaPerSessione(inP.filter(r => r.key === es)).map(r => ({ x: dataBreve(r.data), y: tipo === 'corpo_libero' ? r.rip : r.peso })).filter(p => p.y != null);
-  const primo = pesoPts[0]?.y, ultimo = pesoPts.at(-1)?.y;
-  const varz = pesoPts.length > 1 ? ultimo - primo : null;
-
-  // volume
-  const recVol = inP.filter(r => r.tipo === 'kg' && r.peso > 0);
-  const gruppi = new Map();
-  recVol.forEach(r => {
-    let k, lab;
-    if (gran === 'allenamento') { k = r.sid; lab = dataBreve(r.data); }
-    else if (gran === 'settimana') { const l = lunedi(r.data); k = l.getTime(); lab = dataBreve(l); }
-    else { k = r.data.getFullYear() * 12 + r.data.getMonth(); lab = cap(r.data.toLocaleDateString('it-IT', { month: 'short' }).replace('.', '')); }
-    const g = gruppi.get(k) || { lab, v: 0 };
-    g.v += r.peso * r.rip * r.serie; gruppi.set(k, g);
+// una riga per esercizio, una cella per colonna
+function righeProg(P, gid) {
+  const g = giornoScheda(gid);
+  const ssG = P.sessioni.filter(s => s.giorno === gid).sort((x, y) => new Date(x.data) - new Date(y.data));
+  const mappa = new Map();
+  (g?.esercizi || []).forEach(e => mappa.set(norm(e.nome), { nome: e.nome, sch: e, tipo: e.tipoCarico, categoria: e.categoria }));
+  ssG.forEach(s => (s.esercizi || []).forEach(e => {
+    const k = norm(e.nome);
+    if (!mappa.has(k)) mappa.set(k, { nome: e.nome, sch: null, tipo: e.tipoCarico || 'kg', categoria: e.categoria || '', fuori: true });
+  }));
+  let righe = [...mappa.entries()].map(([k, x]) => {
+    const celle = P.cols.map(c => {
+      const ss = ssG.filter(c.prende);
+      // se nella colonna ci sono più registrazioni (es. un mese) si prende il carico più alto
+      let r = null;
+      ss.forEach(s => (s.esercizi || []).forEach(e => {
+        if (norm(e.nome) !== k) return;
+        if (!r || (valoreEs(e, x.tipo) ?? -1) >= (valoreEs(r, x.tipo) ?? -1)) r = e;
+      }));
+      const saltato = !r && ss.some(s => (s.saltati || []).some(n => norm(n) === k));
+      const prev = P.scheda && x.sch ? x.sch.settimane[c.sett - 1] || null : null;
+      return { r, saltato, prev, futura: !!c.futura, attuale: !!c.attuale && P.scheda };
+    });
+    const vals = celle.map(c => valoreEs(c.r, x.tipo)).filter(v => v != null);
+    const delta = vals.length > 1 ? vals.at(-1) - vals[0] : null;
+    const rirT = x.sch ? x.sch.rir : (celle.find(c => c.r)?.r.previsto?.rir || '');
+    return { key: k, ...x, celle, delta, nVal: vals.length, rirT };
   });
-  const vol = [...gruppi.values()];
-  if (gran === 'settimana' && S.prog.periodo === 'mese') vol.forEach((g, i) => g.lab = `Sett. ${i + 1}`);
-  const volTot = vol.reduce((t, g) => t + g.v, 0);
+  if (!P.scheda) righe = righe.filter(r => r.celle.some(c => c.r || c.saltato));
+  return righe;
+}
+function sintesiProg(P) {
+  const tutte = giorniProg(P).flatMap(id => righeProg(P, id));
+  const confr = tutte.filter(r => r.tipo === 'kg' && r.nVal > 1);
+  return {
+    allenamenti: P.sessioni.length, previsti: P.previsti,
+    aumento: confr.filter(r => r.delta > 0).length, confrontabili: confr.length,
+    saltati: P.sessioni.reduce((t, s) => t + (s.saltati?.length || 0), 0)
+  };
+}
+const diversoDaPrevisto = r => !!(r?.previsto && (r.serie !== r.previsto.serie || r.ripetizioni !== r.previsto.ripetizioni));
 
-  // RIR
-  const rirPts = unaPerSessione(inP.filter(r => r.key === es && r.rir != null)).map(r => ({ x: dataBreve(r.data), y: r.rir }));
-  const rirT = recEs.at(-1)?.rirT || '';
-  const nums = (rirT.match(/\d+(?:[.,]\d+)?/g) || []).map(parseNum);
-  const target = nums.length ? nums.reduce((a, b) => a + b, 0) / nums.length : null;
+function cellaHtml(c, col, tipo) {
+  const cur = c.attuale ? ' cur' : '';
+  if (c.r) {
+    const v = valoreEs(c.r, tipo), dv = diversoDaPrevisto(c.r);
+    return `<div class="pc${cur}"><span class="pl">${esc(col.lab)}</span><span class="pv">${v == null ? '—' : fmtN(v)}</span>`
+      + `<span class="ps${dv ? ' diff' : ''}"${dv ? ` title="Previsto ${c.r.previsto.serie}×${c.r.previsto.ripetizioni}"` : ''}>${c.r.serie}×${c.r.ripetizioni}</span>`
+      + `<span class="pr">${rirTxt(c.r.rirPercepito) || '&#160;'}</span></div>`;
+  }
+  if (c.saltato) return `<div class="pc vuota${cur}"><span class="pl">${esc(col.lab)}</span><span class="pv">—</span><span class="ps sk">saltato</span><span class="pr">&#160;</span></div>`;
+  const p = c.prev;
+  return `<div class="pc vuota${cur}"><span class="pl">${esc(col.lab)}</span><span class="pv">—</span><span class="ps">${p ? p.serie + '×' + p.ripetizioni : '&#160;'}</span><span class="pr">${p?.nota ? esc(p.nota) : '&#160;'}</span></div>`;
+}
+function badgeProg(r) {
+  const u = unitaBreve(r.tipo);
+  if (r.tipo === 'elastico') return '<span class="chip">Elastico</span>';
+  if (r.delta == null) return r.tipo === 'corpo_libero' ? '<span class="chip">Corpo libero</span>' : '';
+  if (r.delta > 0) return `<span class="chip ok">+${fmtN(r.delta)} ${u}</span>`;
+  if (r.delta < 0) return `<span class="chip">${fmtN(r.delta)} ${u}</span>`;
+  return '<span class="chip">stabile</span>';
+}
+function cardEsProg(r, P) {
+  const unita = r.tipo === 'corpo_libero' ? 'ripetizioni' : r.tipo === 'elastico' ? 'kg elastico' : 'kg';
+  const meta = [r.categoria, unita, r.rirT ? 'RIR target ' + r.rirT : '', r.fuori ? 'fuori scheda' : ''].filter(Boolean).join(' · ');
+  const n = P.cols.length;
+  let griglia;
+  if (n === 1) {
+    const c = r.celle[0];
+    if (c.r) {
+      const v = valoreEs(c.r, r.tipo), dv = diversoDaPrevisto(c.r);
+      griglia = `<div class="pone"><span class="pv">${v == null ? '—' : fmtN(v) + ' ' + unitaBreve(r.tipo)}</span>
+        <span><b${dv ? ' style="color:var(--acc)"' : ''}>${c.r.serie}×${c.r.ripetizioni}</b>${dv ? ` (previsto ${c.r.previsto.serie}×${c.r.previsto.ripetizioni})` : ''}${c.r.rirPercepito != null ? ' · ' + rirTxt(c.r.rirPercepito) : ''}</span></div>`;
+    } else griglia = '<div class="pone">Saltato</div>';
+  } else {
+    const celle = r.celle.map((c, i) => cellaHtml(c, P.cols[i], r.tipo)).join('');
+    griglia = n > 6
+      ? `<div class="pscroll"><div class="pgrid" style="grid-template-columns:repeat(${n},50px)">${celle}</div></div>`
+      : `<div class="pgrid" style="grid-template-columns:repeat(${n},minmax(0,1fr))">${celle}</div>`;
+  }
+  return `<div class="card pcard">
+    <div class="between" style="align-items:flex-start"><div class="head"><span style="font-size:15px;font-weight:800">${esc(r.nome)}</span><span class="pmeta">${esc(meta)}</span></div>${badgeProg(r)}</div>
+    ${griglia}
+    <a href="#progEs/${encodeURIComponent(r.key)}" class="plink">Vedi grafico e dettagli</a>
+  </div>`;
+}
 
-  PG = { pesoPts, unita, vol, rirPts, target };
-  const nomeEs = es ? nomi.get(es) : '';
-  const opz = [...nomi.entries()].sort((a, b) => a[1].localeCompare(b[1], 'it')).map(([k, n]) => `<option value="${esc(k)}"${k === es ? ' selected' : ''}>${esc(n)}</option>`).join('');
-  const segP = ['settimana', 'mese', 'anno'].map(p => `<button aria-pressed="${S.prog.periodo === p}" data-a="progPer" data-v="${p}">${cap(p)}</button>`).join('');
-  const segG = [['allenamento', 'Allenamento'], ['settimana', 'Settimana'], ['mese', 'Mese']].map(([v, l]) => `<button aria-pressed="${gran === v}" data-a="progGran" data-v="${v}">${l}</button>`).join('');
-  const vuoto = m => `<div class="empty">${m}</div>`;
-  const colVar = varz == null ? 'inherit' : varz > 0 ? 'var(--ok-ink)' : varz < 0 ? 'var(--acc)' : 'inherit';
-
-  return `<div class="scr" style="gap:16px">
-    <div class="head"><h1 class="big">Progressi</h1><span class="date">${R.length ? `${S.sessioni.length} allenamenti registrati in tutto` : 'Ancora nessun allenamento registrato'}</span></div>
-    <div class="seg" style="grid-template-columns:repeat(3,minmax(0,1fr))">${segP}</div>
-    <div class="pnav">
-      <button class="iconbtn" data-a="progNav" data-d="-1" aria-label="Periodo precedente">${ico('chevL')}</button>
-      <span class="lab">${esc(per.etichetta)}</span>
-      <button class="iconbtn" data-a="progNav" data-d="1" aria-label="Periodo successivo" ${S.prog.offset >= 0 ? 'disabled' : ''}>${ico('chevR')}</button>
+VISTE.progressi = () => {
+  const P = periodoProg();
+  const gids = giorniProg(P);
+  if (!S.prog.giorno || !gids.includes(S.prog.giorno)) S.prog.giorno = gids[0];
+  const sin = sintesiProg(P);
+  const righe = righeProg(P, S.prog.giorno);
+  const segP = [['scheda', 'Scheda'], ['settimana', 'Settimana'], ['mese', 'Mese'], ['anno', 'Anno']]
+    .map(([v, l]) => `<button aria-pressed="${S.prog.periodo === v}" data-a="progPer" data-v="${v}">${l}</button>`).join('');
+  const segG = gids.map(id => `<button aria-pressed="${S.prog.giorno === id}" data-a="progGiorno" data-v="${esc(id)}">${esc(nomeGiornoProg(P, id))}</button>`).join('');
+  const nav = (!P.scheda || P.indietro || P.avanti) ? `<div class="pnav">
+      <button class="iconbtn" data-a="progNav" data-d="-1" aria-label="Periodo precedente" ${P.indietro ? '' : 'disabled'}>${ico('chevL')}</button>
+      <span class="lab">${esc(P.etichetta)}</span>
+      <button class="iconbtn" data-a="progNav" data-d="1" aria-label="Periodo successivo" ${P.avanti ? '' : 'disabled'}>${ico('chevR')}</button>
+    </div>` : '';
+  const spiega = {
+    scheda: 'Ogni casella è una settimana: carico usato, serie × ripetizioni fatte e RIR percepito. In arancio le serie × ripetizioni diverse da quelle previste. Le settimane future mostrano cosa prevede la scheda.',
+    settimana: 'Cosa hai fatto in questa settimana: carico, serie × ripetizioni e RIR percepito.',
+    mese: 'Ogni casella è una settimana del mese (giorni indicati in alto): carico usato, serie × ripetizioni e RIR percepito.',
+    anno: 'Ogni casella è un mese: il carico più alto usato in quel mese, con serie × ripetizioni e RIR.'
+  }[P.periodo];
+  const tile = (k, v, col) => `<div class="tile"><span class="k">${k}</span><span class="v"${col ? ` style="color:${col}"` : ''}>${v}</span></div>`;
+  const vuoto = !P.sessioni.length;
+  return `<div class="scr" style="gap:14px">
+    <div class="head"><h1 class="big">Progressi</h1><span class="date">${esc(S.stato.scheda.nome)}</span></div>
+    <div class="seg" style="grid-template-columns:repeat(4,minmax(0,1fr))">${segP}</div>
+    ${nav}
+    <div class="grid3" style="gap:8px">
+      ${tile('Allenamenti', `${sin.allenamenti}${P.scheda ? `<small> di ${sin.previsti}</small>` : ''}`)}
+      ${tile('Carico in aumento', sin.confrontabili ? `${sin.aumento}<small> di ${sin.confrontabili}</small>` : '—', sin.aumento ? 'var(--ok-ink)' : '')}
+      ${tile('Saltati', sin.saltati)}
     </div>
-    ${!R.length ? vuoto('I grafici compariranno dopo il primo allenamento salvato.') : `
-    <div class="card">
-      <div class="fld" style="gap:6px">
-        <label for="prog-es" class="eyebrow" style="letter-spacing:.5px">${tipo === 'corpo_libero' ? 'Ripetizioni per esercizio' : 'Peso per esercizio'}</label>
-        <select class="inp" id="prog-es" data-ch="progEs">${opz}</select>
-        ${tipo === 'corpo_libero' ? '<span class="hint" style="font-size:12px">Esercizio a corpo libero: il grafico mostra le ripetizioni.</span>' : tipo === 'elastico' ? '<span class="hint" style="font-size:12px">Esercizio con elastico: il grafico mostra i kg dell\'elastico.</span>' : ''}
-      </div>
-      <div class="grid3" style="gap:8px">
-        <div class="head"><span class="date" style="font-size:12px">Ultimo</span><span class="num" style="font-size:26px">${ultimo != null ? fmtN(ultimo) + ' ' + unita : '—'}</span></div>
-        <div class="head"><span class="date" style="font-size:12px">${per.inizio}</span><span class="num" style="font-size:26px">${primo != null ? fmtN(primo) + ' ' + unita : '—'}</span></div>
-        <div class="head"><span class="date" style="font-size:12px">Variazione</span><span class="num" style="font-size:26px;color:${colVar}">${varz != null ? (varz > 0 ? '+' : '') + fmtN(varz) + ' ' + unita : '—'}</span></div>
-      </div>
-      ${pesoPts.length ? '<div class="chartbox"><canvas id="ch-peso" role="img" aria-label="Andamento nel periodo"></canvas></div>' : vuoto('Nessun dato per questo esercizio nel periodo.')}
-    </div>
-    <div class="card" style="gap:12px">
-      <div class="between" style="align-items:flex-end">
-        <div class="head"><span class="eyebrow" style="letter-spacing:.5px">Volume totale</span><span style="font-size:12px;color:var(--mut)">kg × ripetizioni × serie, solo esercizi con pesi</span></div>
-        <span class="num" style="font-size:26px;white-space:nowrap">${fmtInt(volTot)} kg</span>
-      </div>
-      <div class="seg small" style="grid-template-columns:repeat(3,minmax(0,1fr))">${segG}</div>
-      ${vol.length ? '<div class="chartbox"><canvas id="ch-vol" role="img" aria-label="Volume totale"></canvas></div>' : vuoto('Nessun esercizio con pesi nel periodo.')}
-    </div>
-    <div class="card" style="gap:12px">
-      <div class="head"><span class="eyebrow" style="letter-spacing:.5px">RIR percepito</span><span style="font-size:12px;color:var(--mut)">${esc(nomeEs)}</span></div>
-      <div class="legend"><span><span style="width:18px;height:3px;background:var(--acc);border-radius:2px"></span>Percepito</span>${target != null ? `<span><span style="width:18px;border-top:2px dashed var(--mut)"></span>Target (RIR ${esc(rirT)})</span>` : ''}</div>
-      ${rirPts.length ? '<div class="chartbox"><canvas id="ch-rir" role="img" aria-label="RIR percepito nel periodo"></canvas></div>' : vuoto('Nessun RIR registrato per questo esercizio nel periodo.')}
-    </div>`}
+    <button class="btn-pri" data-a="scaricaReport" ${vuoto ? 'disabled' : ''}>${ico('download', 20, 2.5)}Scarica report per il PT (PDF)</button>
+    ${vuoto ? `<div class="empty">Nessun allenamento registrato ${P.scheda ? 'in questa scheda' : 'in questo periodo'}.</div>` : ''}
+    ${vuoto && !P.scheda ? '' : `
+    <div class="dtabs" style="grid-template-columns:repeat(${Math.min(gids.length, 4)},minmax(0,1fr))">${segG}</div>
+    <p class="hint" style="font-size:12px;line-height:1.45;font-weight:500;color:var(--mut2)">${spiega}</p>
+    ${righe.map(r => cardEsProg(r, P)).join('') || '<div class="empty">Nessun esercizio registrato per questo giorno nel periodo.</div>'}`}
   </div>`;
 };
-A.progPer = el => { S.prog.periodo = el.dataset.v; S.prog.offset = 0; S.prog.gran = null; render(); };
-A.progNav = el => { S.prog.offset = Math.min(0, S.prog.offset + Number(el.dataset.d)); render(); };
-A.progGran = el => { S.prog.gran = el.dataset.v; render(); };
-CH.progEs = el => { S.prog.es = el.value; render(); };
+A.progPer = el => { S.prog.periodo = el.dataset.v; S.prog.offset = 0; render(); };
+A.progNav = el => {
+  const d = Number(el.dataset.d);
+  const min = S.prog.periodo === 'scheda' ? 1 - (S.stato.ciclo || 1) : -Infinity;
+  S.prog.offset = Math.max(min, Math.min(0, S.prog.offset + d)); render();
+};
+A.progGiorno = el => { S.prog.giorno = el.dataset.v; render(); };
+A.scaricaReport = () => scaricaReport();
+DOPO.progressi = () => {
+  libPdf().catch(() => { });
+  // con molte colonne (es. anno) la griglia scorre: la apro sul mese corrente o sull'ultimo con dati
+  const P = periodoProg();
+  const idx = P.cols.findIndex(c => c.attuale);
+  document.querySelectorAll('.pscroll').forEach(box => {
+    const celle = [...box.querySelectorAll('.pc')];
+    let i = idx;
+    if (i < 0) { const piene = celle.map((c, k) => c.classList.contains('vuota') ? -1 : k).filter(k => k >= 0); i = piene.length ? piene.at(-1) : 0; }
+    const el = celle[i];
+    if (el) box.scrollLeft = Math.max(0, el.offsetLeft - box.offsetLeft + el.offsetWidth - box.clientWidth + 8);
+  });
+};
 
-function distruggiGrafici() { S.grafici.forEach(g => g.destroy()); S.grafici = []; }
-const etichetteBarre = {
-  id: 'etichetteBarre',
-  afterDatasetsDraw(ch) {
-    const d = ch.data.datasets[0].data;
-    if (d.length > 8) return;
-    const { ctx } = ch;
-    ctx.save(); ctx.textAlign = 'center';
-    ch.getDatasetMeta(0).data.forEach((bar, i) => {
-      const ultimo = i === d.length - 1;
-      ctx.font = `${ultimo ? 800 : 700} 11px Manrope, sans-serif`;
-      ctx.fillStyle = ultimo ? '#17191E' : '#3F444D';
-      ctx.fillText(fmtInt(d[i]), bar.x, bar.y - 6);
-    });
-    ctx.restore();
+// ---------- dettaglio di un esercizio ----------
+let PE = null;
+VISTE.progEs = key => {
+  const regs = sessOrdinate().flatMap(s => (s.esercizi || []).filter(e => norm(e.nome) === key)
+    .map(e => ({ ...e, data: new Date(s.data), settimana: s.settimana, nomeGiorno: s.nomeGiorno })));
+  const sch = S.stato.scheda.giorni.flatMap(g => g.esercizi).find(e => norm(e.nome) === key);
+  const nome = sch?.nome || regs.at(-1)?.nome || key;
+  const tipo = sch?.tipoCarico || regs.at(-1)?.tipoCarico || 'kg';
+  const u = unitaBreve(tipo);
+  const pts = regs.map(r => ({ x: dataBreve(r.data), y: valoreEs(r, tipo) })).filter(p => p.y != null);
+  const rirPts = regs.filter(r => r.rirPercepito != null).map(r => ({ x: dataBreve(r.data), y: r.rirPercepito }));
+  const rirT = sch?.rir || regs.at(-1)?.previsto?.rir || '';
+  const nums = (rirT.match(/\d+(?:[.,]\d+)?/g) || []).map(parseNum);
+  const target = nums.length ? nums.reduce((a, b) => a + b, 0) / nums.length : null;
+  PE = { pts, u, rirPts, target };
+  const prima = pts[0]?.y, ult = pts.at(-1)?.y, dlt = pts.length > 1 ? ult - prima : null;
+  const colD = dlt == null || tipo === 'elastico' ? 'inherit' : dlt > 0 ? 'var(--ok-ink)' : dlt < 0 ? 'var(--acc)' : 'inherit';
+  const nota = S.note[key]?.testo;
+  const ultVol = tipo === 'kg' ? [...regs].reverse().find(r => r.peso > 0) : null;
+  const storico = [...regs].reverse().map(r => {
+    const v = valoreEs(r, tipo), dv = diversoDaPrevisto(r);
+    return `<div class="hrow">
+      <span class="hd">${esc(r.data.toLocaleDateString('it-IT', { day: 'numeric', month: 'short', year: 'numeric' }))}<small>${esc(r.nomeGiorno || '')}${r.settimana ? ' · sett. ' + r.settimana : ''}</small></span>
+      <span class="hv">${v == null ? '—' : fmtN(v) + ' ' + u}</span>
+      <span class="hs"><b${dv ? ' style="color:var(--acc)"' : ''}>${r.serie}×${r.ripetizioni}</b>${dv ? ` (previsto ${r.previsto.serie}×${r.previsto.ripetizioni})` : ''}${r.rirPercepito != null ? ' · ' + rirTxt(r.rirPercepito) : ''}${r.previsto?.rir ? ` (target ${esc(r.previsto.rir)})` : ''}</span>
+    </div>`;
+  }).join('');
+  const vuoto = m => `<div class="empty">${m}</div>`;
+  return `<div class="scr sub nav">
+    <div class="topbar"><a class="iconbtn" href="#progressi" aria-label="Torna ai progressi">${ico('chevL')}</a>
+      <div class="tt"><h1>${esc(nome)}</h1><span class="sub">${esc([sch?.categoria, TIPI[tipo]].filter(Boolean).join(' · '))}</span></div></div>
+    <div class="grid3" style="gap:8px">
+      <div class="tile"><span class="k">Prima volta</span><span class="v">${prima != null ? fmtN(prima) + '<small> ' + u + '</small>' : '—'}</span></div>
+      <div class="tile"><span class="k">Ultima volta</span><span class="v">${ult != null ? fmtN(ult) + '<small> ' + u + '</small>' : '—'}</span></div>
+      <div class="tile"><span class="k">Variazione</span><span class="v" style="color:${colD}">${dlt != null ? (dlt > 0 ? '+' : '') + fmtN(dlt) + '<small> ' + u + '</small>' : '—'}</span></div>
+    </div>
+    ${tipo === 'elastico' ? '<p class="hint" style="font-size:12px">Esercizio con elastico: i kg sono quelli dell\'elastico. Se l\'elastico ti aiuta (es. trazioni assistite), meno kg vuol dire che stai migliorando.</p>' : ''}
+    <div class="card" style="gap:12px">
+      <span class="eyebrow" style="letter-spacing:.5px">${tipo === 'corpo_libero' ? 'Ripetizioni nel tempo' : 'Carico nel tempo'}</span>
+      ${pts.length ? '<div class="chartbox"><canvas id="ch-peso" role="img" aria-label="Andamento del carico"></canvas></div>' : vuoto('Ancora nessun dato per questo esercizio.')}
+    </div>
+    <div class="card" style="gap:12px">
+      <span class="eyebrow" style="letter-spacing:.5px">RIR percepito</span>
+      <div class="legend"><span><span style="width:18px;height:3px;background:var(--acc);border-radius:2px"></span>Percepito</span>${target != null ? `<span><span style="width:18px;border-top:2px dashed var(--mut)"></span>Target (RIR ${esc(rirT)})</span>` : ''}</div>
+      ${rirPts.length ? '<div class="chartbox"><canvas id="ch-rir" role="img" aria-label="RIR percepito nel tempo"></canvas></div>' : vuoto('Nessun RIR registrato.')}
+    </div>
+    ${nota ? `<div class="card sm"><span class="k-up">Le mie note</span><span style="font-size:14px;line-height:1.45">${esc(nota)}</span></div>` : ''}
+    <div class="card" style="gap:0">
+      <span class="eyebrow" style="letter-spacing:.5px;margin-bottom:4px">Tutte le volte (${regs.length})</span>
+      ${storico || vuoto('Ancora nessuna registrazione.')}
+    </div>
+    ${ultVol ? `<p class="hint" style="font-size:12px;text-align:center">Volume dell'ultima volta: ${fmtInt(ultVol.peso * ultVol.ripetizioni * ultVol.serie)} kg (kg × ripetizioni × serie)</p>` : ''}
+  </div>`;
+};
+DOPO.progEs = () => {
+  if (!window.Chart || !PE) return;
+  Chart.defaults.font.family = "'Manrope', system-ui, sans-serif";
+  Chart.defaults.font.size = 11;
+  Chart.defaults.color = '#5A5F69';
+  if (PE.pts.length) graficoLinea('ch-peso', PE.pts, PE.u);
+  if (PE.rirPts.length) {
+    const max = Math.max(4, ...PE.rirPts.map(p => p.y), PE.target ?? 0);
+    graficoLinea('ch-rir', PE.rirPts, 'RIR', { target: PE.target, min: 0, max, step: 1 });
   }
 };
+
+function distruggiGrafici() { S.grafici.forEach(g => g.destroy()); S.grafici = []; }
 function graficoLinea(id, punti, unita, opz = {}) {
   const el = document.getElementById(id);
   if (!el || !window.Chart) return;
@@ -1194,30 +1439,184 @@ function graficoLinea(id, punti, unita, opz = {}) {
     }
   }));
 }
-DOPO.progressi = () => {
-  if (!window.Chart || !PG) return;
-  Chart.defaults.font.family = "'Manrope', system-ui, sans-serif";
-  Chart.defaults.font.size = 11;
-  Chart.defaults.color = '#5A5F69';
-  if (PG.pesoPts.length) graficoLinea('ch-peso', PG.pesoPts, PG.unita);
-  if (PG.rirPts.length) {
-    const max = Math.max(4, ...PG.rirPts.map(p => p.y), PG.target ?? 0);
-    graficoLinea('ch-rir', PG.rirPts, 'RIR', { target: PG.target, min: 0, max, step: 1 });
+
+// ---------- report PDF per il personal trainer ----------
+const JSPDF_URL = 'https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js';
+const AUTOTABLE_URL = 'https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.4/dist/jspdf.plugin.autotable.min.js';
+function caricaScript(src) {
+  return new Promise((ok, ko) => { const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = () => { s.remove(); ko(new Error('Script non caricato: ' + src)); }; document.head.appendChild(s); });
+}
+let pdfPronto = null;
+function libPdf() {
+  if (!pdfPronto) pdfPronto = (async () => {
+    if (!window.jspdf?.jsPDF) await caricaScript(JSPDF_URL);
+    if (!window.jspdf.jsPDF.API.autoTable) await caricaScript(AUTOTABLE_URL);
+    return window.jspdf.jsPDF;
+  })().catch(e => { pdfPronto = null; throw e; });
+  return pdfPronto;
+}
+// i caratteri standard del PDF coprono solo l'alfabeto latino: sostituisco trattini e virgolette "tipografiche"
+const pdfT = s => String(s ?? '').replace(/[‘’]/g, "'").replace(/[“”]/g, '"').replace(/[–—]/g, '-').replace(/…/g, '...').replace(/[^\x00-\xFF]/g, '');
+
+async function scaricaReport() {
+  const P = periodoProg();
+  if (!P.sessioni.length) { toast('Nessun allenamento registrato nel periodo'); return; }
+  toast('Preparo il PDF…', 8000);
+  let jsPDF;
+  try { jsPDF = await libPdf(); }
+  catch (e) { console.error(e); toast('Non riesco a creare il PDF: controlla la connessione e riprova', 4000); return; }
+
+  const doc = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'a4' });
+  const W = doc.internal.pageSize.getWidth(), M = 30;
+  const INK = [23, 25, 30], MUT = [90, 95, 105], MUT2 = [63, 68, 77], ACC = [185, 61, 11], OK = [31, 107, 64], LINE = [228, 226, 220], GRIGIO = [160, 162, 168];
+  const st = S.stato, sc = st.scheda;
+  const persona = S.utente?.displayName || '';
+  const titolo = [persona, sc.obiettivo ? 'Scheda ' + sc.obiettivo : sc.nome].filter(Boolean).join(' · ');
+  const date = P.sessioni.map(s => new Date(s.data)).sort((a, b) => a - b);
+  const fmtD = d => d.toLocaleDateString('it-IT', { day: 'numeric', month: 'short', year: 'numeric' }).replace('.', '');
+  const periodoTxt = fmtD(date[0]) === fmtD(date.at(-1)) ? fmtD(date[0]) : `${fmtD(date[0])} - ${fmtD(date.at(-1))}`;
+  const sin = sintesiProg(P);
+  const settFatte = P.scheda ? [...new Set(P.sessioni.map(s => s.settimana))].sort((a, b) => a - b) : [];
+
+  // intestazione
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(8.5); doc.setTextColor(...ACC);
+  doc.text('REPORT PROGRESSI' + (P.scheda && (st.ciclo || 1) > 1 ? ` · CICLO ${P.ciclo}` : ''), M, M + 6);
+  doc.setFontSize(17); doc.setTextColor(...INK);
+  doc.text(pdfT(titolo), M, M + 26);
+  const info = [
+    ['Periodo', periodoTxt],
+    P.scheda ? ['Settimane', settFatte.length ? `${settFatte[0] === settFatte.at(-1) ? settFatte[0] : settFatte[0] + '-' + settFatte.at(-1)} di ${sc.settimane}` : '-'] : ['Vista', cap(P.periodo) + ' · ' + P.etichetta],
+    ['Allenamenti', P.scheda ? `${sin.allenamenti} di ${sin.previsti} previsti` : String(sin.allenamenti)],
+    ['Esercizi saltati', String(sin.saltati)]
+  ];
+  let x = W - M;
+  for (const [k, v] of [...info].reverse()) {
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(10.5); const wv = doc.getTextWidth(pdfT(v));
+    doc.setFontSize(7.5); const wk = doc.getTextWidth(k);
+    const w = Math.max(wv, wk);
+    x -= w;
+    doc.setTextColor(...MUT); doc.setFontSize(7.5); doc.text(k, x, M + 12);
+    doc.setTextColor(...INK); doc.setFontSize(10.5); doc.text(pdfT(v), x, M + 26);
+    x -= 22;
   }
-  const el = document.getElementById('ch-vol');
-  if (el && PG.vol.length) {
-    const v = PG.vol;
-    S.grafici.push(new Chart(el, {
-      type: 'bar', plugins: [etichetteBarre],
-      data: { labels: v.map(g => g.lab), datasets: [{ data: v.map(g => Math.round(g.v)), backgroundColor: v.map((_, i) => i === v.length - 1 ? '#B93D0B' : '#E3C4B4'), borderRadius: 6, maxBarThickness: 48 }] },
-      options: {
-        maintainAspectRatio: false, animation: false, layout: { padding: { top: 22 } },
-        plugins: { legend: { display: false }, tooltip: { displayColors: false, callbacks: { label: c => `${fmtInt(c.parsed.y)} kg` } } },
-        scales: { x: { grid: { display: false }, border: { color: '#E4E2DC' }, ticks: { maxRotation: 0, autoSkip: true } }, y: { display: false, beginAtZero: true } }
+  doc.setDrawColor(...ACC); doc.setLineWidth(2); doc.line(M, M + 36, W - M, M + 36);
+  doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(...MUT2);
+  const legenda = 'Ogni cella: carico usato (un peso unico per esercizio) - serie x ripetizioni eseguite - RIR percepito. In arancio le serie x ripetizioni diverse da quelle previste. '
+    + (P.scheda ? 'Settimane non svolte: prescrizione della scheda (prev.).' : P.periodo === 'anno' ? 'Per ogni mese il carico più alto usato.' : P.periodo === 'mese' ? 'Colonne = settimane del mese.' : '');
+  doc.text(doc.splitTextToSize(pdfT(legenda), W - 2 * M), M, M + 50);
+
+  // tabelle: una per giorno
+  const nCol = P.cols.length;
+  const wNome = 150, wTarget = 74, wVar = 60;
+  const wCella = (W - 2 * M - wNome - wTarget - wVar) / nCol;
+  const stretta = wCella < 72;
+  const L = (t, o = {}) => ({ t: pdfT(t), s: o.s || 8, b: !!o.b, c: o.c || INK, r: !!o.r });
+  const cellaPdf = (c, tipo) => {
+    if (c.r) {
+      const v = valoreEs(c.r, tipo), dv = diversoDaPrevisto(c.r);
+      const sr = `${c.r.serie}×${c.r.ripetizioni}`, rir = rirTxt(c.r.rirPercepito);
+      const righe = [L(v == null ? '-' : `${fmtN(v)} ${unitaBreve(tipo)}`, { s: 9.5, b: true })];
+      if (stretta) { righe.push(L(sr, { s: 7.5, c: dv ? ACC : MUT2, b: dv })); if (rir) righe.push(L(rir, { s: 7.5, c: MUT2 })); }
+      else righe.push(L(sr + (rir ? ' · ' + rir : ''), { s: 7.5, c: dv ? ACC : MUT2, b: dv }));
+      return righe;
+    }
+    if (c.saltato) return [L('saltato', { s: 8, b: true, c: ACC })];
+    if (c.prev) return [L('-', { s: 9, c: GRIGIO }), L(`prev. ${c.prev.serie}×${c.prev.ripetizioni}${c.prev.nota ? ' ' + c.prev.nota : ''}`, { s: 7, c: MUT })];
+    return [L('-', { s: 9, c: GRIGIO })];
+  };
+  const cella = (linee, extra = {}) => ({ content: linee.map(l => l.t || ' ').join('\n'), linee, ...extra });
+  const chiavi = new Set();
+  let y = M + 62;
+  for (const gid of giorniProg(P)) {
+    const righe = righeProg(P, gid).filter(r => P.scheda || r.nVal || r.celle.some(c => c.saltato));
+    if (!righe.length) continue;
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(9.5);
+    const body = righe.map(r => {
+      chiavi.add(r.key);
+      const sub = [r.categoria, r.tipo !== 'kg' ? TIPI[r.tipo] : '', r.fuori ? 'fuori scheda' : ''].filter(Boolean).join(' · ');
+      const nomeLinee = doc.splitTextToSize(pdfT(r.nome), wNome - 10).map(t => L(t, { s: 9, b: true }));
+      const p = r.sch ? pianoSett(r.sch) : null;
+      const rec = r.sch ? recSett(r.sch, p) : 0;
+      const varTxt = r.delta == null ? '' : r.delta === 0 ? '=' : `${r.delta > 0 ? '+' : ''}${fmtN(r.delta)} ${unitaBreve(r.tipo)}`;
+      const varCol = r.tipo !== 'elastico' && r.delta > 0 ? OK : INK;
+      return [
+        cella([...nomeLinee, L(sub, { s: 7, c: MUT })]),
+        cella([L(r.rirT ? 'RIR ' + r.rirT : 'RIR -', { s: 7.5, c: MUT2 }), L(rec ? 'Rec. ' + fmtRec(rec) : '', { s: 7.5, c: MUT2 })]),
+        ...r.celle.map(c => cella(cellaPdf(c, r.tipo), { futura: c.futura })),
+        cella([L(varTxt + (r.tipo === 'elastico' && varTxt ? ' (el.)' : ''), { s: 9.5, b: true, c: varCol, r: true })])
+      ];
+    });
+    const colStyles = { 0: { cellWidth: wNome }, 1: { cellWidth: wTarget }, [nCol + 2]: { cellWidth: wVar } };
+    for (let i = 0; i < nCol; i++) colStyles[i + 2] = { cellWidth: wCella };
+    doc.autoTable({
+      startY: y, margin: { left: M, right: M, top: M, bottom: 34 }, theme: 'plain',
+      head: [[pdfT(nomeGiornoProg(P, gid)), 'TARGET', ...P.cols.map(c => pdfT(c.lungo)), { content: 'VARIAZIONE', styles: { halign: 'right' } }]],
+      body, columnStyles: colStyles, rowPageBreak: 'avoid', showHead: 'everyPage',
+      styles: { font: 'helvetica', fontSize: 8.5, cellPadding: { top: 5, bottom: 5, left: 5, right: 5 }, textColor: INK, lineColor: LINE, lineWidth: { bottom: 0.6 }, minCellHeight: 28, valign: 'top' },
+      headStyles: { fontStyle: 'bold', fontSize: 7, textColor: MUT, lineColor: INK, lineWidth: { bottom: 1.2 }, fillColor: false, minCellHeight: 0 },
+      didParseCell: d => {
+        if (d.section === 'head' && d.column.index === 0) { d.cell.styles.fontSize = 11; d.cell.styles.textColor = INK; }
+        if (d.section === 'body' && d.cell.raw?.futura) d.cell.styles.fillColor = [250, 250, 247];
+      },
+      willDrawCell: d => { if (d.section === 'body' && d.cell.raw?.linee) d.cell.text = []; },
+      didDrawCell: d => {
+        if (d.section !== 'body' || !d.cell.raw?.linee) return;
+        const { x: cx, y: cy, width } = d.cell, pad = 5;
+        let yy = cy + pad;
+        for (const l of d.cell.raw.linee) {
+          if (!l.t) { yy += l.s * 1.2; continue; }
+          doc.setFont('helvetica', l.b ? 'bold' : 'normal'); doc.setFontSize(l.s); doc.setTextColor(...l.c);
+          yy += l.s * 0.95;
+          doc.text(l.t, l.r ? cx + width - pad : cx + pad, yy, { align: l.r ? 'right' : 'left' });
+          yy += l.s * 0.3;
+        }
       }
-    }));
+    });
+    y = doc.lastAutoTable.finalY + 16;
   }
-};
+
+  // note personali sugli esercizi del report
+  const note = Object.entries(S.note).filter(([k, v]) => chiavi.has(k) && str(v?.testo));
+  if (note.length) {
+    doc.autoTable({
+      startY: y, margin: { left: M, right: M, top: M, bottom: 34 }, theme: 'plain', rowPageBreak: 'avoid',
+      head: [[persona ? `Note di ${pdfT(persona.split(' ')[0])}` : 'Note personali', '']],
+      body: note.map(([, v]) => [pdfT(v.nome), pdfT(v.testo)]),
+      columnStyles: { 0: { cellWidth: 200, fontStyle: 'bold' } },
+      styles: { font: 'helvetica', fontSize: 9, cellPadding: 5, textColor: INK, lineColor: LINE, lineWidth: { bottom: 0.6 } },
+      headStyles: { fontStyle: 'bold', fontSize: 11, lineColor: INK, lineWidth: { bottom: 1.2 }, fillColor: false }
+    });
+  }
+
+  // piè di pagina
+  const nPag = doc.internal.getNumberOfPages();
+  const oggi = new Date().toLocaleDateString('it-IT', { day: 'numeric', month: 'long', year: 'numeric' });
+  for (let i = 1; i <= nPag; i++) {
+    doc.setPage(i);
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(7.5); doc.setTextColor(...MUT);
+    const h = doc.internal.pageSize.getHeight();
+    doc.text(`Pagina ${i} di ${nPag}`, M, h - 16);
+    doc.text(pdfT(`${sc.nome} · generato il ${oggi}`), W - M, h - 16, { align: 'right' });
+  }
+
+  const slug = s => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^A-Za-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
+  const parte = P.scheda ? (settFatte.length ? `sett${settFatte[0]}-${settFatte.at(-1)}` : '') : slug(P.etichetta);
+  const nomeFile = ['Progressi', slug(persona), slug(sc.obiettivo || sc.nome), parte].filter(Boolean).join('_') + '.pdf';
+  const blob = doc.output('blob');
+  const file = new File([blob], nomeFile, { type: 'application/pdf' });
+  // sul telefono si apre la condivisione (es. WhatsApp); altrimenti il file si scarica
+  const telefono = matchMedia('(pointer: coarse)').matches;
+  if (telefono && navigator.canShare?.({ files: [file] })) {
+    try { await navigator.share({ files: [file], title: 'Report progressi' }); toast('Report pronto'); return; }
+    catch (e) { if (e?.name === 'AbortError') { toast('Condivisione annullata'); return; } }
+  }
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = nomeFile;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 10000);
+  toast('Report scaricato: ' + nomeFile, 4000);
+}
 
 // =====================================================================
 //  GESTIONE SCHEDA
@@ -1285,6 +1684,7 @@ CH.fileBackup = async el => {
   const quando = d.esportatoIl ? new Date(d.esportatoIl).toLocaleDateString('it-IT', { day: 'numeric', month: 'long', year: 'numeric' }) : 'data sconosciuta';
   if (!await conferma({ titolo: 'Ripristinare il backup?', testo: `Backup del ${quando}: ${sessioni.length === 1 ? '1 allenamento' : sessioni.length + ' allenamenti'}, ${Object.keys(note).length === 1 ? '1 nota' : Object.keys(note).length + ' note'}. Sostituisce TUTTI i dati attuali (scheda, settimana, storico e note).`, ok: 'Ripristina backup', pericolo: true })) return;
   const stato = completaStato({ ...d.stato, scheda: v.scheda });
+  delete stato._daSalvare;
   try {
     clearTimeout(salvaT); salvaT = null;
     toast('Ripristino in corso…');
@@ -1306,7 +1706,9 @@ VISTE.importa = () => {
       <div><b>${esc(sc.nome)}</b>${sc.obiettivo ? ' · ' + esc(sc.obiettivo) : ''} · ${sc.settimane} settimane</div>
       <div>${sc.giorni.map(g => `${esc(g.nome)}: ${g.esercizi.length} esercizi`).join(' · ')}</div>
       <div>Riscaldamento: ${nRisc} esercizi</div></div>
-      <button class="btn-pri" data-a="applicaScheda">Sostituisci la scheda attiva</button>`;
+      <button class="btn-pri" data-a="applicaScheda">Nuova scheda: sostituisci e riparti dalla settimana 1</button>
+      <button class="btn-sec" data-a="aggiornaScheda">Stessa scheda corretta: aggiorna e resta alla settimana ${S.stato.settimana}</button>
+      <p class="hint" style="font-size:12px;margin-top:-6px">Usa «aggiorna» se è la scheda che stai già facendo con qualche correzione: settimana, giorni fatti e progressi restano come sono.</p>`;
   }
   return `<div class="scr sub nav">
     <div class="topbar"><a class="iconbtn" href="#scheda" aria-label="Indietro">${ico('chevL')}</a>
@@ -1351,10 +1753,25 @@ A.applicaScheda = async () => {
   if (!sc) return;
   const s = sess();
   if (!await conferma({ titolo: 'Sostituire la scheda attiva?', testo: `«${sc.nome}» prenderà il posto di «${S.stato.scheda.nome}» e la settimana tornerà a 1. Lo storico degli allenamenti resta.${s ? ' L\'allenamento in corso verrà annullato.' : ''}`, ok: 'Sostituisci scheda' })) return;
-  Object.assign(S.stato, { scheda: sc, settimana: 1, ultimoGiorno: null, completati: [], precedente: null, sessioneInCorso: null });
+  const nuova = { ...sc, id: nuovoIdScheda() };
+  delete nuova.legacy;
+  Object.assign(S.stato, { scheda: nuova, settimana: 1, ciclo: 1, ultimoGiorno: null, completati: [], precedente: null, sessioneInCorso: null });
   S.importa = null; S.importaTesto = ''; S.giornoScelto = null; S.modTab = null;
   await scriviStato();
   vai('home'); toast('Nuova scheda attiva: settimana 1');
+};
+// stessa scheda con correzioni: cambia esercizi e valori, ma settimana, giorni fatti e storico restano
+A.aggiornaScheda = async () => {
+  const sc = S.importa?.scheda;
+  if (!sc) return;
+  const st = S.stato, att = st.scheda;
+  if (!await conferma({ titolo: 'Aggiornare la scheda attiva?', testo: `Esercizi, serie, ripetizioni, recuperi e RIR vengono presi dal file. Resti alla settimana ${Math.min(st.settimana, sc.settimane)}, con i giorni già fatti e tutti i progressi.${sess() ? ' L\'allenamento in corso resta com\'è: le novità valgono dal prossimo.' : ''}`, ok: 'Aggiorna scheda' })) return;
+  st.scheda = { ...sc, id: att.id, ...(att.legacy ? { legacy: true } : {}) };
+  st.settimana = Math.min(st.settimana, sc.settimane);
+  st.completati = st.completati.filter(id => sc.giorni.some(g => g.id === id));
+  S.importa = null; S.importaTesto = ''; S.giornoScelto = null; S.modTab = null;
+  await scriviStato();
+  vai('home'); toast(`Scheda aggiornata: sei sempre alla settimana ${st.settimana}`);
 };
 
 // ---------- modifica permanente della scheda ----------
@@ -1383,7 +1800,7 @@ VISTE.modifica = () => {
         const p = pianoSett(e);
         return `<div class="ex" style="padding:8px 12px 8px 6px">${frecce(`data-a="modSposta"`, i, g.esercizi.length)}
           <button class="body" data-a="modEs" data-i="${i}"><span class="n">${esc(e.nome)}</span>
-            <span class="m">${esc(e.categoria)} · ${p.serie} × ${p.ripetizioni}${e.perLato ? ' per lato' : ''} (sett. ${S.stato.settimana})${e.tipoCarico !== 'kg' ? ' · ' + TIPI[e.tipoCarico] : ''}</span></button>
+            <span class="m">${esc(e.categoria)} · ${p.serie} × ${p.ripetizioni}${e.perLato ? ' per lato' : ''}${recSett(e, p) ? ' · Rec. ' + fmtRec(recSett(e, p)) : ''} (sett. ${S.stato.settimana})${e.tipoCarico !== 'kg' ? ' · ' + TIPI[e.tipoCarico] : ''}</span></button>
           <button class="iconbtn plain" aria-label="Modifica" data-a="modEs" data-i="${i}">${ico('pencil', 20)}</button></div>`;
       }).join('')
       + `<button class="btn-dash" data-a="modEs" data-i="-1">${ico('plus', 18, 2.5)}Aggiungi esercizio a ${esc(g.nome)}</button>`;
@@ -1430,10 +1847,14 @@ A.modEs = el => {
   const sc = S.stato.scheda, g = giornoScheda(S.modTab), i = Number(el.dataset.i), nuovo = i < 0;
   const e = nuovo ? { nome: '', categoria: 'Monoarticolari', tipoCarico: 'kg', perLato: false, settimane: Array.from({ length: sc.settimane }, () => ({ serie: 3, ripetizioni: 10 })), rir: '', tempo: '', recuperoSec: 60, note: '', videoUrl: '' } : g.esercizi[i];
   const cats = [...new Set([...CATEGORIE, ...sc.giorni.flatMap(x => x.esercizi.map(y => y.categoria))])];
-  const righe = e.settimane.map((w, k) => `<div class="wrow"><span>Sett. ${k + 1}</span>
-      <input class="inp" id="m-s-${k}" inputmode="numeric" aria-label="Serie settimana ${k + 1}" value="${w.serie}"><span>×</span>
-      <input class="inp" id="m-r-${k}" inputmode="numeric" aria-label="Ripetizioni settimana ${k + 1}" value="${w.ripetizioni}">
-      <input class="inp nota" id="m-n-${k}" aria-label="Nota settimana ${k + 1}" placeholder="nota" value="${esc(w.nota || '')}"></div>`).join('');
+  const righe = e.settimane.map((w, k) => `<div class="wcard"><span class="wt">Settimana ${k + 1}</span>
+      <div class="wgrid">
+        <div class="fld"><label for="m-s-${k}">Serie</label><input class="inp" id="m-s-${k}" inputmode="numeric" value="${w.serie}"></div>
+        <div class="fld"><label for="m-r-${k}">Ripetizioni</label><input class="inp" id="m-r-${k}" inputmode="numeric" value="${w.ripetizioni}"></div>
+        <div class="fld"><label for="m-wr-${k}">RIR</label><input class="inp" id="m-wr-${k}" value="${esc(w.rir ?? '')}" placeholder="${esc(e.rir || '—')}"></div>
+        <div class="fld"><label for="m-wc-${k}">Rec. (s)</label><input class="inp" id="m-wc-${k}" inputmode="numeric" value="${w.recuperoSec ?? ''}" placeholder="${e.recuperoSec || 0}"></div>
+      </div>
+      <input class="inp nota" id="m-n-${k}" aria-label="Nota settimana ${k + 1}" placeholder="nota (es. scarico)" value="${esc(w.nota || '')}"></div>`).join('');
   apriFoglio(`<h2>${nuovo ? 'Nuovo esercizio' : 'Modifica esercizio'}</h2>
     <p class="hint">${esc(g.nome)} · modifica permanente della scheda</p>
     <div class="fld"><label for="m-e-nome">Nome</label><input class="inp" id="m-e-nome" value="${esc(e.nome)}" autocomplete="off"></div>
@@ -1442,12 +1863,12 @@ A.modEs = el => {
       <div class="fld"><label for="m-e-tipo">Carico</label><select class="inp" id="m-e-tipo">${Object.entries(TIPI).map(([k, v]) => `<option value="${k}"${e.tipoCarico === k ? ' selected' : ''}>${v}</option>`).join('')}</select></div>
     </div>
     <label class="check"><input type="checkbox" id="m-e-lato"${e.perLato ? ' checked' : ''}>Ripetizioni per lato</label>
-    <div class="fld" style="gap:8px"><span class="lbl">Serie × ripetizioni per settimana (nota: es. «scarico»)</span>${righe}</div>
     <div class="grid3">
       <div class="fld"><label for="m-e-rir">RIR target</label><input class="inp" id="m-e-rir" value="${esc(e.rir)}"></div>
       <div class="fld"><label for="m-e-tempo">Tempo</label><input class="inp" id="m-e-tempo" value="${esc(e.tempo)}" placeholder="2''/1''/2''"></div>
       <div class="fld"><label for="m-e-rec">Recupero (s)</label><input class="inp" id="m-e-rec" inputmode="numeric" value="${e.recuperoSec}"></div>
     </div>
+    <div class="fld" style="gap:8px"><span class="lbl">Settimana per settimana. RIR e recupero vuoti = valori qui sopra.</span>${righe}</div>
     <div class="fld"><label for="m-e-video">Link video YouTube</label><input class="inp" id="m-e-video" inputmode="url" value="${esc(e.videoUrl)}"></div>
     <div class="fld"><label for="m-e-note">Note del trainer</label><textarea class="inp" id="m-e-note" rows="3">${esc(e.note)}</textarea></div>
     <div id="m-err"></div>
@@ -1459,7 +1880,7 @@ A.salvaModEs = el => {
   const sc = S.stato.scheda, g = giornoScheda(S.modTab), i = Number(el.dataset.i);
   const grezzo = {
     nome: $('#m-e-nome').value.replace(/\s+/g, ' '), categoria: $('#m-e-cat').value, tipoCarico: $('#m-e-tipo').value, perLato: $('#m-e-lato').checked,
-    settimane: Array.from({ length: sc.settimane }, (_, k) => ({ serie: $('#m-s-' + k).value, ripetizioni: $('#m-r-' + k).value, nota: $('#m-n-' + k).value })),
+    settimane: Array.from({ length: sc.settimane }, (_, k) => ({ serie: $('#m-s-' + k).value, ripetizioni: $('#m-r-' + k).value, nota: $('#m-n-' + k).value, rir: $('#m-wr-' + k).value, recuperoSec: str($('#m-wc-' + k).value) })),
     rir: $('#m-e-rir').value, tempo: $('#m-e-tempo').value, recuperoSec: $('#m-e-rec').value, videoUrl: $('#m-e-video').value, note: $('#m-e-note').value
   };
   const err = [];
@@ -1572,6 +1993,7 @@ async function caricaDati() {
     S.sessioni = d.sessioni || []; S.note = d.note || {};
     S.stato = d.stato ? completaStato(d.stato) : null;
     if (!S.stato) { S.stato = statoIniziale(); await S.archivio.salvaStato(S.stato); }
+    else if (S.stato._daSalvare) { delete S.stato._daSalvare; await S.archivio.salvaStato(S.stato); }
   } catch (e) {
     console.error(e);
     S.stato = null;
